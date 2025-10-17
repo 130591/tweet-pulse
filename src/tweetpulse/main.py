@@ -1,80 +1,95 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi import Request
-import os
 import logging
+import time
 
-# Optional: enable debugpy inside container for VS Code attach
-if os.getenv("ENABLE_DEBUGPY") == "1":
-    try:
-        import debugpy  # type: ignore
-        _dbg_port = int(os.getenv("DEBUGPY_PORT", "5678"))
-        debugpy.listen(("0.0.0.0", _dbg_port))
-        if os.getenv("DEBUGPY_WAIT_FOR_CLIENT") == "1":
-            print(f"Waiting for debugger attach on 0.0.0.0:{_dbg_port} ...")
-            debugpy.wait_for_client()
-    except Exception as _e:  # pragma: no cover
-        print(f"debugpy setup failed: {_e}")
+from .core.config import settings
+from .core.dependencies import get_tweet_fetcher
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+	level=logging.INFO if not settings.DEBUG else logging.DEBUG,
+	format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger("tweetpulse")
 
-ALLOWED_ORIGINS = [item.strip() for item in (os.getenv("ALLOWED_ORIGINS") or "*").split(",")]
-ALLOWED_HOSTS = [item.strip() for item in (os.getenv("ALLOWED_HOSTS") or "localhost,127.0.0.1").split(",")]
-
-app = FastAPI(title="TweetPulse", description="Real-time social intelligence platform")
+app = FastAPI(
+	title="TweetPulse",
+	description="Real-time social intelligence platform",
+	version="1.0.0",
+	debug=settings.DEBUG
+)
 
 app.add_middleware(
 	CORSMiddleware,
-	allow_origins=ALLOWED_ORIGINS or ["*"],
+	allow_origins=["*"],
 	allow_credentials=True,
-	allow_methods=["*"],
+	allow_methods=["GET", "POST", "PUT", "DELETE"],
 	allow_headers=["*"],
 )
-	
+
 app.add_middleware(
 	TrustedHostMiddleware,
-	allowed_hosts=ALLOWED_HOSTS or ["localhost", "127.0.0.1"],
+	allowed_hosts=["localhost", "127.0.0.1"],
 )
 
+
 @app.middleware("http")
-async def add_request_id(request: Request, call_next):
-	import uuid
-	request_id = str(uuid.uuid4())
-	request.state.request_id = request_id
-	
-	response = await call_next(request)
-	response.headers["X-Request-ID"] = request_id
-	
-	return response
-    
-@app.middleware("http")
-async def add_process_time_header(request: Request, call_next):
-	import time
+async def log_requests(request, call_next):
 	start_time = time.time()
 	
 	response = await call_next(request)
 	
 	process_time = time.time() - start_time
-	response.headers["X-Process-Time"] = str(process_time)
-	
 	logger.info(
 		f"{request.method} {request.url.path} - "
 		f"Status: {response.status_code} - Time: {process_time:.3f}s"
 	)
 	
+	response.headers["X-Process-Time"] = str(process_time)
 	return response
-	
 
 @app.get("/")
 async def root():
-  return {"message": "TweetPulse API is running!"}
+  return {"message": "TweetPulse API is running!", "version": "1.0.0"}
 
 @app.get("/health")
 async def health():
-  return {"status": "healthy"}
+  return {"status": "healthy", "debug": settings.DEBUG}
+
+@app.get("/tweets")
+async def get_tweets(
+  fetcher = Depends(get_tweet_fetcher)
+):
+  return await fetcher.fetch_tweets("python", settings.MAX_TWEETS_PER_REQUEST)
+
+@app.get("/settings")
+async def get_app_settings():
+	return {
+		"debug": settings.DEBUG,
+		"max_tweets_per_request": settings.MAX_TWEETS_PER_REQUEST,
+		"twitter_configured": bool(settings.TWITTER_BEARER_TOKEN)
+	}
+
+@app.on_event("startup")
+async def startup_event():
+	logger.info("🚀 TweetPulse API iniciando...")
+	if not settings.TWITTER_BEARER_TOKEN:
+		logger.warning("⚠️  TWITTER_BEARER_TOKEN não configurado!")
+	else:
+		logger.info("✅ Twitter API configurada")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+  logger.info("👋 TweetPulse API finalizando...")
 
 if __name__ == "__main__":
 	import uvicorn
-	uvicorn.run(app, host="0.0.0.0", port=8000)
+	
+	uvicorn.run(
+		"main:app",
+		host=settings.HOST,
+		port=settings.PORT,
+		reload=settings.DEBUG,
+		log_level="info" if not settings.DEBUG else "debug"
+	)
