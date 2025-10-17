@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "tweetpulse"
+version = "1.0.0"
+description = "Real-time social intelligence platform"
+authors = ["Everton Paixão <everton.paixao16@gmail.com>"]
+readme = "README.md"
+packages = [{include = "tweetpulse", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "0.104.1"
+uvicorn = {extras = ["standard"], version = "0.24.0"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
