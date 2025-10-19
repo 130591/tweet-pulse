@@ -1,8 +1,7 @@
 import tweepy
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from pydantic import BaseModel
 
-# Modelos de resposta usando Pydantic
 class TweetResponse(BaseModel):
   id: str
   content: str

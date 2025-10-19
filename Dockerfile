@@ -15,8 +15,8 @@ RUN pip install --no-cache-dir poetry debugpy
 # Copy dependency files
 COPY pyproject.toml poetry.lock ./
 
-# Install dependencies only (not the current project)
-RUN poetry install --no-root
+# Install Python dependencies directly
+RUN pip install fastapi==0.104.1 uvicorn[standard]==0.24.0 tweepy==4.14.0
 
 # Copy source code
 COPY src ./src
@@ -24,4 +24,4 @@ COPY src ./src
 EXPOSE 8000 5678
 
 # Run the application (compose may override to add --reload)
-CMD ["poetry", "run", "uvicorn", "tweetpulse.main:app", "--host", "0.0.0.0"]
+CMD ["uvicorn", "tweetpulse.main:app", "--host", "0.0.0.0"]

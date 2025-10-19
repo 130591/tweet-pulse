@@ -1,4 +1,6 @@
-from .config import settings
+from typing import TypedDict 
+from .config import settings, Settings
+from tweetpulse.services.tweet_fetcher import TweetFetcher
 
 class TweetPulseSettings(TypedDict):
   twitter_token: str
