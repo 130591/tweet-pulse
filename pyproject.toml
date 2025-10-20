@@ -12,6 +12,14 @@ fastapi = "0.104.1"
 uvicorn = {extras = ["standard"], version = "0.24.0"}
 tweepy = "^4.14.0"
 
+# Database dependencies for Repository Pattern
+sqlalchemy = "^2.0.0"
+alembic = "^1.12.0"
+psycopg2-binary = {version = "^2.9.0", optional = true}
+
+[tool.poetry.extras]
+postgresql = ["psycopg2-binary"]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

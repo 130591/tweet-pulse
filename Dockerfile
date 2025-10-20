@@ -16,7 +16,8 @@ RUN pip install --no-cache-dir poetry debugpy
 COPY pyproject.toml poetry.lock ./
 
 # Install Python dependencies directly
-RUN pip install fastapi==0.104.1 uvicorn[standard]==0.24.0 tweepy==4.14.0
+RUN pip install fastapi==0.104.1 uvicorn[standard]==0.24.0 tweepy==4.14.0 \
+    sqlalchemy==2.0.23 alembic==1.12.1 psycopg2-binary==2.9.9
 
 # Copy source code
 COPY src ./src
