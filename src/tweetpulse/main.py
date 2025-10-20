@@ -73,15 +73,15 @@ async def get_app_settings():
 
 @app.on_event("startup")
 async def startup_event():
-	logger.info("🚀 TweetPulse API iniciando...")
+	logger.info("🚀 TweetPulse API starting...")
 	if not settings.TWITTER_BEARER_TOKEN:
-		logger.warning("⚠️  TWITTER_BEARER_TOKEN não configurado!")
+		logger.warning("⚠️  TWITTER_BEARER_TOKEN not configured!")
 	else:
-		logger.info("✅ Twitter API configurada")
+		logger.info("✅ Twitter API configured")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-  logger.info("👋 TweetPulse API finalizando...")
+  logger.info("👋 TweetPulse API shutting down...")
 
 if __name__ == "__main__":
 	import uvicorn
