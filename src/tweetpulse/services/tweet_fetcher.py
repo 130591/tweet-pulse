@@ -67,10 +67,10 @@ class TweetFetcher:
                       impression_count=tweet_data.metrics.get("impression_count", 0)
                   )
               except Exception as e:
-                  logger.error(f"Erro ao salvar tweet {tweet_data.id}: {e}")
+                  logger.error(f"Error saving tweet {tweet_data.id}: {e}")
           
           return tweets_response
             
         except Exception as e:
-            logger.error(f"Erro ao buscar tweets: {e}")
+            logger.error(f"Error fetching tweets: {e}")
             return TweetsResponse(tweets=[], total=0)
