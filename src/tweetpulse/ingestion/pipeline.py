@@ -25,27 +25,27 @@ class IngestionPipeline:
       staging_dir: Path,
       num_workers: int = 3
   ):
-      self.keywords = keywords
-      self.staging_dir = Path(staging_dir)
-      self.num_workers = num_workers
-      self.is_running = False
-      self.tasks = []
+    self.keywords = keywords
+    self.staging_dir = Path(staging_dir)
+    self.num_workers = num_workers
+    self.is_running = False
+    self.tasks = []
 
-      # Initialize components
-      self.redis = Redis.from_url(settings.REDIS_URL)
-      self.connector = TwitterStreamConnector(
-        redis=self.redis,
-        keywords=self.keywords,
-        stream_key="ingest:stream"
-      )
-      
-      # Initialize processing components
-      self.deduplicator = BloomDeduplicator(redis=self.redis, key="dedup:bloom")
-      self.enricher = TweetEnricher()
-      self.storage = Storage(
-        redis=self.redis,
-        staging_dir=self.staging_dir
-      )
+    # Initialize components
+    self.redis = Redis.from_url(settings.REDIS_URL)
+    self.connector = TwitterStreamConnector(
+      redis=self.redis,
+      keywords=self.keywords,
+      stream_key="ingest:stream"
+    )
+    
+    # Initialize processing components
+    self.deduplicator = BloomDeduplicator(redis=self.redis, key="dedup:bloom")
+    self.enricher = TweetEnricher()
+    self.storage = Storage(
+      redis=self.redis,
+      staging_dir=self.staging_dir
+    )
 
   def get_session(self) -> Session:
     """Get a synchronous database session."""
