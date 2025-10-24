@@ -28,6 +28,8 @@ class Settings:
 	NUM_WORKERS: int = 3
 	STAGING_DIR: Path = Path("./staging")
 	BATCH_WRITE_INTERVAL: int = 300
+	BATCH_SIZE: int = int(os.getenv("BATCH_SIZE", "100"))  # Number of tweets per batch
+	MAX_BATCH_WAIT_SECONDS: int = int(os.getenv("MAX_BATCH_WAIT_SECONDS", "60"))  # Max wait time before flush
 	
 	# Logging
 	LOG_LEVEL: str = "INFO"

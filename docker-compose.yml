@@ -3,7 +3,7 @@ version: '3.9'
 services:
   app:
     build: .
-    command: poetry run uvicorn tweetpulse.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/src
+    command: uvicorn tweetpulse.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/src
     ports:
       - "8000:8000"
       - "5678:5678"
@@ -14,11 +14,28 @@ services:
       - REDIS_URL=redis://redis:6379
       - ENABLE_DEBUGPY=1
       - DEBUGPY_PORT=5678
+      - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN}
     volumes:
       - ./src:/app/src
     depends_on:
       - db
       - redis
+  
+  worker:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+asyncpg://tweetpulse:password@db:5432/tweetpulse
+      REDIS_URL: redis://redis:6379
+      TWITTER_BEARER_TOKEN: ${TWITTER_BEARER_TOKEN}
+      TWITTER_KEYWORDS: python,fastapi,ai
+      NUM_WORKERS: 3
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./staging:/app/staging
+    command: python -m src.tweetpulse.worker
+    restart: always
 
   db:
     image: postgres:15

@@ -13,11 +13,10 @@ ENV POETRY_VIRTUALENVS_CREATE=false \
 RUN pip install --no-cache-dir poetry debugpy
 
 # Copy dependency files
-COPY pyproject.toml poetry.lock ./
+COPY requirements.txt ./
 
-# Install Python dependencies directly
-RUN pip install fastapi==0.104.1 uvicorn[standard]==0.24.0 tweepy==4.14.0 \
-    sqlalchemy==2.0.23 alembic==1.12.1 psycopg2-binary==2.9.9
+# Install Python dependencies from requirements to include redis and others
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code
 COPY src ./src

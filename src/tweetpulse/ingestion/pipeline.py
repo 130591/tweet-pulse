@@ -61,8 +61,15 @@ class IngestionPipeline:
       logger.debug(f"Duplicate tweet: {tweet_id}")
       return
     
+    # Enrich the tweet with additional processing
     enriched = await self.enricher.enrich(fields)
+    
+    # Store in staging (Redis/filesystem)
     await self.storage.store(enriched)
+    
+    # Add to batch for database write
+    if hasattr(self, 'batch_writer'):
+      await self.batch_writer.add_tweet(enriched)
 
     logger.info(f"Processed tweet: {tweet_id}")
 
@@ -90,11 +97,13 @@ class IngestionPipeline:
       consumer_task = asyncio.create_task(consumer.start())
       self.tasks.append(consumer_task)
 
-    # Start batch writer
+    # Start batch writer with proper configuration
     self.batch_writer = BatchWriter(
       session_factory=self.get_session,
       staging_dir=self.staging_dir,
-      interval_seconds=300
+      batch_size=settings.BATCH_SIZE,
+      max_wait_seconds=settings.MAX_BATCH_WAIT_SECONDS,
+      max_retries=3
     )
 
     writer_task = asyncio.create_task(self.batch_writer.run_forever())
@@ -121,5 +130,7 @@ class IngestionPipeline:
       self.connector.close()
     if hasattr(self, 'batch_writer'):
       self.batch_writer.stop()
+      # Wait for final flush
+      await self.batch_writer.flush()
 
     logger.info("Pipeline stopped")

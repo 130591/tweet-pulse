@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.declarative import declarative_base
-from typing import Generic, Optional, TypeVar, List
+from typing import Generic, Optional, TypeVar, List, Dict, Any
+from sqlalchemy.dialects.postgresql import insert
 
 Base = declarative_base()
 T = TypeVar("T", bound=Base)
@@ -81,3 +82,42 @@ class BaseRepository(Generic[T]):
             if hasattr(self.model, key):
                 query = query.filter(getattr(self.model, key) == value)
         return query.first()
+    
+    def bulk_create(self, records: List[Dict[str, Any]], return_defaults: bool = False) -> List[T]:
+        """Bulk insert multiple records efficiently."""
+        if not records:
+            return []
+        
+        try:
+            instances = [self.model(**record) for record in records]
+            self.session.bulk_save_objects(instances, return_defaults=return_defaults)
+            self.session.commit()
+            return instances
+        except Exception as e:
+            self.session.rollback()
+            raise e
+    
+def upsert_many(self, records: List[Dict[str, Any]], conflict_fields: List[str] = None) -> int:
+		if not records:
+			return 0
+		
+		try:
+			stmt = insert(self.model.__table__).values(records)
+			
+			if conflict_fields:
+				# Update all fields except the conflict fields
+				update_dict = {c.name: c for c in stmt.excluded if c.name not in conflict_fields}
+				stmt = stmt.on_conflict_do_update(
+					index_elements=conflict_fields,
+					set_=update_dict
+				)
+			else:
+				# Use primary key as default conflict field
+				stmt = stmt.on_conflict_do_nothing()
+			
+			result = self.session.execute(stmt)
+			self.session.commit()
+			return result.rowcount
+		except Exception as e:
+			self.session.rollback()
+			raise e

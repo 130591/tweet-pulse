@@ -1,11 +1,11 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import logging
 import time
 
+from .api.v1 import tweets
 from .core.config import settings
-from .core.dependencies import get_tweet_fetcher
 
 logging.basicConfig(
 	level=logging.INFO if not settings.DEBUG else logging.DEBUG,
@@ -49,27 +49,10 @@ async def log_requests(request, call_next):
 	response.headers["X-Process-Time"] = str(process_time)
 	return response
 
-@app.get("/")
-async def root():
-  return {"message": "TweetPulse API is running!", "version": "1.0.0"}
-
-@app.get("/health")
-async def health():
-  return {"status": "healthy", "debug": settings.DEBUG}
-
-@app.get("/tweets")
-async def get_tweets(
-  fetcher = Depends(get_tweet_fetcher)
-):
-  return await fetcher.fetch_tweets("python", settings.MAX_TWEETS_PER_REQUEST)
-
-@app.get("/settings")
-async def get_app_settings():
-	return {
-		"debug": settings.DEBUG,
-		"max_tweets_per_request": settings.MAX_TWEETS_PER_REQUEST,
-		"twitter_configured": bool(settings.TWITTER_BEARER_TOKEN)
-	}
+app.include_router(tweets.router, prefix="/health", tags=["health"])
+app.include_router(tweets.router, prefix="/tweets", tags=["tweets"])
+app.include_router(tweets.router, prefix="/settings", tags=["settings"])
+app.include_router(tweets.router, prefix="/stats", tags=["stats"])
 
 @app.on_event("startup")
 async def startup_event():
