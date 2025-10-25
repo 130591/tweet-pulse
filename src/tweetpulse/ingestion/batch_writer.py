@@ -8,44 +8,49 @@ from contextlib import contextmanager
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from redis.asyncio import Redis
 
 from ..repositories.tweet_repository import TweetRepository
 from ..models.database import Tweet, SentimentType
 from ..core.config import get_settings
+from ..distributed.locking import RedisLock
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
 class BatchWriter:
   """Thread-safe batch writer for efficient database writes.
-  
+
   Implements best practices for distributed systems:
   - Configurable batch size
   - Automatic flush on batch size or timeout
   - Thread-safe operations with asyncio.Lock
+  - Distributed locking for multi-instance safety
   - Retry logic with exponential backoff
   - Proper error handling and metrics
   """
-  
+
   def __init__(
     self,
     session_factory: Callable[[], Session],
     staging_dir: Path,
     batch_size: int = 100,
     max_wait_seconds: int = 60,
-    max_retries: int = 3
+    max_retries: int = 3,
+    redis_client: Optional[Redis] = None
   ):
     self.session_factory = session_factory
     self.staging_dir = staging_dir
     self.batch_size = batch_size
     self.max_wait_seconds = max_wait_seconds
     self.max_retries = max_retries
-    
+    self.redis = redis_client  # Injeção de dependência!
+
     self.is_running = False
     self.batch: List[Dict[str, Any]] = []
     self._lock = asyncio.Lock()
     self._last_flush_time = time.time()
-    
+
     # Metrics
     self.total_processed = 0
     self.total_failed = 0
@@ -98,54 +103,69 @@ class BatchWriter:
         logger.error(f"Unexpected error in batch writer: {e}", exc_info=True)
 
   async def flush(self) -> bool:
-    """Flush the current batch to the database with retry logic."""
+    """Flush the current batch to the database with retry logic and distributed locking."""
     async with self._lock:
       if not self.batch:
         return True
-      
+
       # Take a copy and clear the batch
       tweets_to_save = self.batch.copy()
       self.batch = []
       batch_size = len(tweets_to_save)
-    
-    # Try to save with retries
-    for attempt in range(self.max_retries):
-      try:
-        success = await self._write_batch_to_db(tweets_to_save)
-        if success:
-          self.total_processed += batch_size
-          self.total_batches_written += 1
-          self._last_flush_time = time.time()
-          logger.info(
-            f"Successfully flushed batch: size={batch_size}, "
-            f"total_processed={self.total_processed}, "
-            f"batches_written={self.total_batches_written}"
+
+    lock_key = f"batch_writer_flush:{self.batch_size}"
+    distributed_lock = RedisLock(self.redis, lock_key, timeout_seconds=30)
+
+    try:
+      lock_acquired = await distributed_lock.acquire()
+      if not lock_acquired:
+        logger.warning(f"Failed to acquire distributed lock for batch flush, retrying...")
+        # Put tweets back in batch for next flush attempt
+        async with self._lock:
+          self.batch = tweets_to_save + self.batch
+          self.total_failed += batch_size
+        return False
+
+      logger.debug(f"Distributed lock acquired for batch flush: {batch_size} tweets")
+
+      for attempt in range(self.max_retries):
+        try:
+          success = await self._write_batch_to_db(tweets_to_save)
+          if success:
+            self.total_processed += batch_size
+            self.total_batches_written += 1
+            self._last_flush_time = time.time()
+            logger.info(
+              f"Successfully flushed batch: size={batch_size}, "
+              f"total_processed={self.total_processed}, "
+              f"batches_written={self.total_batches_written}"
+            )
+            return True
+        except Exception as e:
+          logger.error(
+            f"Attempt {attempt + 1}/{self.max_retries} failed for batch of {batch_size}: {e}"
           )
-          return True
-      except Exception as e:
-        logger.error(
-          f"Attempt {attempt + 1}/{self.max_retries} failed for batch of {batch_size}: {e}"
-        )
-        if attempt < self.max_retries - 1:
-          # Exponential backoff
-          await asyncio.sleep(2 ** attempt)
-    
-    # All retries failed, put tweets back in batch
-    logger.error(f"Failed to write batch after {self.max_retries} attempts")
-    async with self._lock:
-      # Prepend failed tweets back to the batch
-      self.batch = tweets_to_save + self.batch
-      self.total_failed += batch_size
-    return False
+          if attempt < self.max_retries - 1:
+            await asyncio.sleep(2 ** attempt)
+
+            if attempt >= 1:
+              await distributed_lock.extend(additional_seconds=15)
+
+      logger.error(f"Failed to write batch after {self.max_retries} attempts")
+      async with self._lock:
+        self.batch = tweets_to_save + self.batch
+        self.total_failed += batch_size
+      return False
+
+    finally:
+      await distributed_lock.release()
   
   async def _write_batch_to_db(self, tweets: List[Dict[str, Any]]) -> bool:
-    """Write a batch of tweets to the database."""
     loop = asyncio.get_event_loop()
     
     def blocking_db_write():
       with self.get_session_with_repo() as (session, repo):
         try:
-          # Transform tweets to match database schema
           records = []
           for tweet_data in tweets:
             record = {

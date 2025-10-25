@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from redis import Redis
 from sqlalchemy import create_engine
@@ -23,7 +23,9 @@ class IngestionPipeline:
       self,
       keywords: List[str],
       staging_dir: Path,
-      num_workers: int = 3
+      num_workers: int = 3,
+      redis_client: Optional[Redis] = None,
+      database_url: Optional[str] = None
   ):
     self.keywords = keywords
     self.staging_dir = Path(staging_dir)
@@ -31,14 +33,16 @@ class IngestionPipeline:
     self.is_running = False
     self.tasks = []
 
-    # Initialize components
-    self.redis = Redis.from_url(settings.REDIS_URL)
+    # Initialize components with dependency injection
+    self.redis = redis_client or Redis.from_url(settings.REDIS_URL)
+    self.database_url = database_url or settings.DATABASE_URL
+
     self.connector = TwitterStreamConnector(
       redis=self.redis,
       keywords=self.keywords,
       stream_key="ingest:stream"
     )
-    
+
     # Initialize processing components
     self.deduplicator = BloomDeduplicator(redis=self.redis, key="dedup:bloom")
     self.enricher = TweetEnricher()
@@ -49,7 +53,7 @@ class IngestionPipeline:
 
   def get_session(self) -> Session:
     """Get a synchronous database session."""
-    engine = create_engine(settings.DATABASE_URL)
+    engine = create_engine(self.database_url)
     SessionLocal = sessionmaker(bind=engine)
     return SessionLocal()
 
@@ -103,7 +107,8 @@ class IngestionPipeline:
       staging_dir=self.staging_dir,
       batch_size=settings.BATCH_SIZE,
       max_wait_seconds=settings.MAX_BATCH_WAIT_SECONDS,
-      max_retries=3
+      max_retries=3,
+      redis_client=self.redis  # Pass Redis for distributed locking
     )
 
     writer_task = asyncio.create_task(self.batch_writer.run_forever())
@@ -132,5 +137,14 @@ class IngestionPipeline:
       self.batch_writer.stop()
       # Wait for final flush
       await self.batch_writer.flush()
+
+    # Clean up any stale distributed locks
+    try:
+      from .distributed.locking import DistributedLockManager
+      lock_manager = DistributedLockManager(self.redis)
+      await lock_manager.cleanup_stale_locks()
+      logger.info("Cleaned up stale distributed locks")
+    except Exception as e:
+      logger.warning(f"Failed to cleanup distributed locks: {e}")
 
     logger.info("Pipeline stopped")

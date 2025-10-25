@@ -15,7 +15,7 @@ class BloomDeduplicator:
         await self.redis.bf().add(self.bloom_key, tweet_id)
         return False
 
-      is_dup = await self.redis.sismember(self.bloom_key, tweet_id)
+      is_dup = await self.redis.sismember('dedup:seen', tweet_id)
       
       if not is_dup:
         await self.redis.sadd("dedup:seen", tweet_id)

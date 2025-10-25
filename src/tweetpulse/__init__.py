@@ -18,6 +18,10 @@ from .ingestion import (
   Storage,
   BatchWriter,
 )
+from .distributed import (
+  RedisLock,
+  DistributedLockManager,
+)
 
 __all__ = [
   "IngestionPipeline",
@@ -28,4 +32,6 @@ __all__ = [
   "BatchEnricher",
   "Storage",
   "BatchWriter",
+  "RedisLock",
+  "DistributedLockManager",
 ]
