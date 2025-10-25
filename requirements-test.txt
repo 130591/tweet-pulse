@@ -1,0 +1,24 @@
+# Minimal test dependencies for Tweet Pulse integration tests
+# Only includes what's actually needed for our tests
+
+# Core testing framework
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# Required for our tests
+fakeredis[aioredis]>=2.19.0
+
+# Code coverage (optional)
+pytest-cov>=4.1.0
+
+# Test utilities
+pytest-mock>=3.11.0
+
+# HTTP mocking for tests
+responses>=0.23.0
+
+# Optional: parallel execution
+pytest-xdist>=3.3.0
+
+# Optional: timeout protection
+pytest-timeout>=2.1.0
