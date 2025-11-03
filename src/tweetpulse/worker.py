@@ -2,21 +2,37 @@ import asyncio
 import signal
 import logging
 from pathlib import Path
+from typing import Optional, Any
 
-from core.config import get_settings
-from database.engine import init_db, close_db
-from cache.redis_client import init_cache, close_cache
-from ingestion.pipeline import IngestionPipeline
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
 
-settings = get_settings()
-logger = logging.getLogger(__name__)
+from tweetpulse.core.config import settings
+from tweetpulse.models.database import Base
+from tweetpulse.ingestion.pipeline import IngestionPipeline
 
-# Global para signal handling
-pipeline: IngestionPipeline = None
+# Configuração de logging
+logging.basicConfig(
+    level=logging.INFO if not settings.DEBUG else logging.DEBUG,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger("tweetpulse.worker")
+
+engine = create_async_engine(settings.DATABASE_URL)
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+pipeline: Optional[IngestionPipeline] = None
 shutdown_event = asyncio.Event()
 
+async def init_db() -> AsyncSession:
+  async with engine.begin() as conn:
+    await conn.run_sync(Base.metadata.create_all)
+  return async_session()
+
+async def close_db() -> None:
+  await engine.dispose()
+
 def signal_handler(signum, frame):
-  """Handler para SIGTERM/SIGINT"""
   logger.info(f"\nReceived signal {signum}, shutting down...")
   shutdown_event.set()
 
@@ -32,14 +48,16 @@ async def main():
   logger.info("Starting TweetPulse Ingestion Worker")
   logger.info("=" * 80)
   
+  db = None
+  pipeline_task = None
+  
   try:
-    await init_db()
-    await init_cache()
-    logger.info("✓ Infrastructure initialized")
+    db = await init_db()
+    logger.info("✓ Database initialized")
     
     pipeline = IngestionPipeline(
       keywords=settings.TWITTER_KEYWORDS.split(","),
-      staging_dir=settings.STAGING_DIR,
+      staging_dir=Path(settings.STAGING_DIR),
       num_workers=settings.NUM_WORKERS,
     )
     
@@ -54,22 +72,27 @@ async def main():
     await shutdown_event.wait()
     
     logger.info("\nInitiating graceful shutdown...")
-    await pipeline.stop()
     
-    await asyncio.wait_for(pipeline_task, timeout=30)
+    if pipeline:
+      await pipeline.stop()
+    
+    if pipeline_task:
+      await asyncio.wait_for(pipeline_task, timeout=30)
       
   except asyncio.TimeoutError:
     logger.error("Pipeline shutdown timed out, forcing...")
-    pipeline_task.cancel()
+    if pipeline_task:
+      pipeline_task.cancel()
       
   except Exception as e:
-    logger.error(f"Error in worker: {e}")
+    logger.error(f"Error in worker: {e}", exc_info=True)
     raise
       
   finally:
+    if db:
+      await db.close()
     await close_db()
-    await close_cache()
     logger.info("✓ Worker shutdown complete")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+  asyncio.run(main())

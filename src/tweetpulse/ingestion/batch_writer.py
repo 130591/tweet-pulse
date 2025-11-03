@@ -44,7 +44,7 @@ class BatchWriter:
     self.batch_size = batch_size
     self.max_wait_seconds = max_wait_seconds
     self.max_retries = max_retries
-    self.redis = redis_client  # Injeção de dependência!
+    self.redis = redis_client
 
     self.is_running = False
     self.batch: List[Dict[str, Any]] = []

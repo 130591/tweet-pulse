@@ -3,7 +3,7 @@ from typing import Optional
 
 class TwitterClient:
   def __init__(self, bearer_token: str):
-      self.client = tweepy.Client(bearer_token=bearer_token)
+    self.client = tweepy.Client(bearer_token=bearer_token)
   
   def search_tweets(self, query: str, max_results: int = 10, **kwargs) -> tweepy.Response:
     """Busca tweets usando a API do Twitter."""

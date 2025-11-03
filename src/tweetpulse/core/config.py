@@ -25,11 +25,12 @@ class Settings:
 	ENABLE_DEBUGPY: bool = os.getenv("ENABLE_DEBUGPY", "False").lower() == "true"
 
 	# Pipeline
-	NUM_WORKERS: int = 3
-	STAGING_DIR: Path = Path("./staging")
+	NUM_WORKERS: int = int(os.getenv("NUM_WORKERS", "3"))
+	STAGING_DIR: Path = Path(os.getenv("STAGING_DIR", "./staging"))
 	BATCH_WRITE_INTERVAL: int = 300
 	BATCH_SIZE: int = int(os.getenv("BATCH_SIZE", "100"))  # Number of tweets per batch
 	MAX_BATCH_WAIT_SECONDS: int = int(os.getenv("MAX_BATCH_WAIT_SECONDS", "60"))  # Max wait time before flush
+	TWITTER_KEYWORDS: str = os.getenv("TWITTER_KEYWORDS", "python,fastapi,ai")
 	
 	# Logging
 	LOG_LEVEL: str = "INFO"

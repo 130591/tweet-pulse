@@ -10,7 +10,7 @@ services:
     env_file:
       - .env 
     environment:
-      - DATABASE_URL=postgresql+psycopg2://user:password@db:5432/tweetpulse
+      - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/tweetpulse
       - REDIS_URL=redis://redis:6379
       - ENABLE_DEBUGPY=1
       - DEBUGPY_PORT=5678
@@ -24,7 +24,7 @@ services:
   worker:
     build: .
     environment:
-      DATABASE_URL: postgresql+asyncpg://tweetpulse:password@db:5432/tweetpulse
+      DATABASE_URL: postgresql+asyncpg://user:password@db:5432/tweetpulse
       REDIS_URL: redis://redis:6379
       TWITTER_BEARER_TOKEN: ${TWITTER_BEARER_TOKEN}
       TWITTER_KEYWORDS: python,fastapi,ai
@@ -34,7 +34,8 @@ services:
       - redis
     volumes:
       - ./staging:/app/staging
-    command: python -m src.tweetpulse.worker
+      - ./src:/app/src
+    command: python -m tweetpulse.worker
     restart: always
 
   db:
