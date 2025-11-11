@@ -10,16 +10,16 @@ class BloomDeduplicator:
       self.bloom_key = "dedup:bloom"
 
     async def is_duplicate(self, tweet_id: str) -> bool:
-      exists = await self.redis.bf().exists(self.bloom_key, tweet_id)
+      exists = self.redis.bf().exists(self.bloom_key, tweet_id)
       if not exists:
-        await self.redis.bf().add(self.bloom_key, tweet_id)
+        self.redis.bf().add(self.bloom_key, tweet_id)
         return False
 
-      is_dup = await self.redis.sismember('dedup:seen', tweet_id)
+      is_dup = self.redis.sismember('dedup:seen', tweet_id)
       
       if not is_dup:
-        await self.redis.sadd("dedup:seen", tweet_id)
-        await self.redis.bf().add(self.bloom_key, tweet_id)
+        self.redis.sadd("dedup:seen", tweet_id)
+        self.redis.bf().add(self.bloom_key, tweet_id)
       return is_dup
 
 async def process_tweet(fields):

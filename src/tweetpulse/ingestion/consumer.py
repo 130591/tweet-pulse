@@ -2,6 +2,7 @@ import logging
 from typing import Callable
 from redis import Redis
 import asyncio
+import os
 from tweetpulse.core.config import get_settings
 
 settings = get_settings()
@@ -18,16 +19,24 @@ class StreamConsumer:
     self.consumer_name = consumer_name
     self.processor = processor
     self.logger = logging.getLogger(__name__)
+    # Control whether to process from beginning (0) or end ($)
+    # Default: "$" for production safety
+    self.start_from = os.getenv("STREAM_START_FROM", "$")
 
   async def start(self):
     try:
       try:
+        # Use STREAM_START_FROM env var to control where to start:
+        # "$" = end (only new messages) - production safe
+        # "0" = beginning (all messages) - for backfill/recovery
+        start_msg = "end of stream" if self.start_from == "$" else "beginning of stream"
         self.redis.xgroup_create(
-          name=self.group_name,
-          stream=self.stream_key,
-          id="0",
+          name=self.stream_key,
+          groupname=self.group_name,
+          id=self.start_from,
           mkstream=True
         )
+        self.logger.info(f"Created consumer group '{self.group_name}' starting from {start_msg}")
       except Exception as e:
         self.logger.error(f"Error creating consumer group: {e}")
         pass

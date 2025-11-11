@@ -12,7 +12,7 @@ from .connector import TwitterStreamConnector
 from .consumer import StreamConsumer
 from .batch_writer import BatchWriter
 from .deduplication import BloomDeduplicator
-from .enrichment import TweetEnricher
+from .enrichment_factory import create_enricher, get_enricher_info
 from .storage import Storage
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,14 @@ class IngestionPipeline:
 
     # Initialize processing components
     self.deduplicator = BloomDeduplicator(redis=self.redis, key="dedup:bloom")
-    self.enricher = TweetEnricher()
+    
+    # Create enricher based on environment (auto-selects lite for dev, full for prod)
+    self.enricher = create_enricher()
+    
+    # Log which enricher is being used
+    enricher_info = get_enricher_info()
+    logger.info(f"🔧 Using {enricher_info['version'].upper()} enricher: {enricher_info['model']} ({enricher_info['reason']})")
+    
     self.storage = Storage(
       redis=self.redis,
       staging_dir=self.staging_dir
@@ -74,6 +81,9 @@ class IngestionPipeline:
     # Add to batch for database write
     if hasattr(self, 'batch_writer'):
       await self.batch_writer.add_tweet(enriched)
+      logger.debug(f"Tweet {tweet_id} added to batch")
+    else:
+      logger.warning(f"batch_writer not available for tweet {tweet_id}")
 
     logger.info(f"Processed tweet: {tweet_id}")
 
@@ -85,23 +95,10 @@ class IngestionPipeline:
     self.is_running = True
     logger.info("Starting ingestion pipeline")
 
-    # Start connector
-    connector_task = asyncio.create_task(self.connector.start())
-    self.tasks.append(connector_task)
+    # Start connector (synchronous, just initializes)
+    self.connector.start()
 
-    # Start consumers
-    for i in range(self.num_workers):
-      consumer = StreamConsumer(
-        redis=self.redis,
-        stream_key="ingest:stream",
-        group_name="workers",
-        consumer_name=f"worker-{i}",
-        processor=self.process_tweet
-      )
-      consumer_task = asyncio.create_task(consumer.start())
-      self.tasks.append(consumer_task)
-
-    # Start batch writer with proper configuration
+    # Initialize batch writer BEFORE consumers (so it's available in process_tweet)
     self.batch_writer = BatchWriter(
       session_factory=self.get_session,
       staging_dir=self.staging_dir,
@@ -113,6 +110,18 @@ class IngestionPipeline:
 
     writer_task = asyncio.create_task(self.batch_writer.run_forever())
     self.tasks.append(writer_task)
+
+    # Start consumers (they will use batch_writer in process_tweet)
+    for i in range(self.num_workers):
+      consumer = StreamConsumer(
+        redis=self.redis,
+        stream_key="ingest:stream",
+        group_name="workers",
+        consumer_name=f"worker-{i}",
+        processor=self.process_tweet
+      )
+      consumer_task = asyncio.create_task(consumer.start())
+      self.tasks.append(consumer_task)
 
     logger.info("Pipeline started with %d workers", self.num_workers)
     logger.info(f"Monitoring keywords: {self.keywords}")
