@@ -80,8 +80,9 @@ class RedisLock:
 
           result = await self.redis.eval(
             lua_script,
-            keys=[self.lock_key],
-            args=[self._lock_value]
+            1,
+            self.lock_key,
+            self._lock_value
           )
 
           if result:
@@ -122,8 +123,10 @@ class RedisLock:
 
         result = await self.redis.eval(
           lua_script,
-          keys=[self.lock_key],
-          args=[self._lock_value, additional_seconds * 1000]  # PEXPIRE uses milliseconds
+          1,
+          self.lock_key,
+          self._lock_value,
+          additional_seconds * 1000  # PEXPIRE uses milliseconds
         )
 
         if result:
