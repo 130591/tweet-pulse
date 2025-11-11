@@ -10,7 +10,7 @@ interface HeaderProps {
   onTimeRangeChange: (range: string) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ selectedTimeRange, onTimeRangeChange }) => {
+const Header: React.FC<HeaderProps> = () => {
   return (
     <AntHeader
       style={{
@@ -158,4 +158,4 @@ const Header: React.FC<HeaderProps> = ({ selectedTimeRange, onTimeRangeChange })
   );
 };
 
-export default Header;
+export { Header };
