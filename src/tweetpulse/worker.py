@@ -11,7 +11,6 @@ from tweetpulse.core.config import settings
 from tweetpulse.models.database import Base
 from tweetpulse.ingestion.pipeline import IngestionPipeline
 
-# Configuração de logging
 logging.basicConfig(
     level=logging.INFO if not settings.DEBUG else logging.DEBUG,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
