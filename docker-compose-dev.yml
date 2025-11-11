@@ -1,0 +1,78 @@
+
+# Lightweight version using Dockerfile.dev (without PyTorch/Transformers)
+# Usage: docker-compose -f docker-compose-dev.yml up
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: uvicorn tweetpulse.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/src
+    ports:
+      - "8000:8000"
+      - "5678:5678"
+    env_file:
+      - .env 
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/tweetpulse
+      - REDIS_URL=redis://redis:6379
+      - ENABLE_DEBUGPY=1
+      - DEBUGPY_PORT=5678
+      - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN}
+      - USE_LITE_ENRICHMENT=1
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - db
+      - redis
+  
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      DATABASE_URL: postgresql+asyncpg://user:password@db:5432/tweetpulse
+      REDIS_URL: redis://redis:6379
+      TWITTER_BEARER_TOKEN: ${TWITTER_BEARER_TOKEN}
+      TWITTER_KEYWORDS: python,fastapi,ai
+      NUM_WORKERS: 3
+      USE_LITE_ENRICHMENT: 1
+      STREAM_START_FROM: "0"  # Process from beginning for dev
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./staging:/app/staging
+      - ./src:/app/src
+    command: python -m tweetpulse.worker
+    restart: always
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=tweetpulse
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis/redis-stack-server:latest
+
+  simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+    volumes:
+      - ./data:/app/data
+      - ./scripts:/app/scripts
+      - ./src:/app/src
+    command: python scripts/simulator/simulate_tweet_stream.py --speed medium --loop
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
