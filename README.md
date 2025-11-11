@@ -1,6 +1,75 @@
 # TweetPulse - Twitter/X API Access Request
 ## Open Source Project - Developer Agreement & Policy
 
+> 🪶 **NEW:** [Versão Lite disponível](docs/LITE_VERSION.md) - Sem PyTorch/HuggingFace (~500MB vs ~3.5GB)  
+> Use `./scripts/run-lite.sh up` para rodar a versão otimizada!
+ 
+# TweetPulse
+
+Docs · [Community](https://github.com/130591/tweetpulse/issues) · [Roadmap](#roadmap) · [Why TweetPulse?](#why-tweetpulse) · [Changelog](https://github.com/130591/tweetpulse/releases) · [Bug reports](https://github.com/130591/tweetpulse/issues/new/choose)
+
+TweetPulse is an open source, real‑time tweet analytics platform. It provides everything you need to ingest, enrich, analyze and visualize public tweets end‑to‑end for educational and learning purposes.
+
+- **Product analytics**: ingestion pipeline with enrichment, deduplication, batching and storage.
+- **Web analytics**: API and cache optimized for dashboard reads.
+- **Real-time stream**: Redis Streams for fan‑out and WebSocket updates.
+- **Sentiment/NLP**: pluggable enrichment layer with Lite option.
+- **Developer experience**: simulator to develop without hitting Twitter API.
+
+Quick links:
+- [Getting started](#getting-started)
+- [Local dev quickstart](#local-development)
+- [Stream simulator](#stream-simulator)
+- [Architecture](docs/arch/ingestion-arch.md)
+- [Contributing](#contributing)
+
+---
+
+## Getting started
+
+Choose one of the options below:
+
+- **Lite Mode (recommended for laptops):**
+  - Guide: docs/LITE_VERSION.md
+  - Run: `./scripts/run-lite.sh up`
+
+- **Full stack with Docker Compose:**
+  - Requirements: Docker + Docker Compose
+  - Run backend: `docker-compose up app db redis`
+
+## Local development
+
+- Backend dev server: `docker-compose up app`
+- Worker: `docker-compose up worker`
+- Environment: configure `.env` (see `docker-compose.yml` for variables)
+
+## Stream simulator
+
+Develop without the Twitter API using the built‑in simulator:
+
+- Quick start: `python scripts/simulator/simulate_tweet_stream.py --speed medium --loop`
+- Docs: `scripts/simulator/QUICK_START_SIMULATOR.md`
+- Dataset: `data/fake_tweets_dataset.json`
+
+## Why TweetPulse?
+
+- Educational end‑to‑end reference of a real‑time data pipeline
+- Clear architecture, modular ingestion, and production‑style patterns
+- Works fully locally; simulator removes external API constraints
+
+## Contributing
+
+- Issues and feature requests: https://github.com/130591/tweetpulse/issues
+- Good first issues: check open issues labeled `good first issue`
+- PRs welcome! Please include tests when possible.
+
+## Roadmap
+
+- Expand datasets and simulator scenarios (load, error, throttling)
+- WebSocket live dashboard updates
+- Additional enrichers (language, entities)
+- Benchmarks and observability
+
 ---
 
 ## 1. PROJECT INFORMATION
