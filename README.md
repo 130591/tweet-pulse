@@ -37,8 +37,34 @@ Choose one of the options below:
   - Requirements: Docker + Docker Compose
   - Run backend: `docker-compose up app db redis`
 
+## 🌊 Pulse CLI (Recommended)
+
+**NEW:** Control your entire TweetPulse environment with an interactive CLI!
+
+```bash
+# Interactive mode - choose what to run
+python3 pulse.py
+
+# Or use direct commands
+python3 pulse.py dev all        # Run everything
+python3 pulse.py dev frontend   # Run only frontend
+python3 pulse.py dev api        # Run backend + workers
+python3 pulse.py status         # Check status
+python3 pulse.py logs -f        # Follow logs
+python3 pulse.py stop           # Stop everything
+```
+
+**Quick setup:**
+```bash
+pip3 install -r requirements-cli.txt
+python3 pulse.py
+```
+
+📖 See [QUICK_START.md](QUICK_START.md) or [CLI_README.md](CLI_README.md) for full documentation.
+
 ## Local development
 
+- **With Pulse CLI (recommended):** `python3 pulse.py dev all`
 - Backend dev server: `docker-compose up app`
 - Worker: `docker-compose up worker`
 - Environment: configure `.env` (see `docker-compose.yml` for variables)

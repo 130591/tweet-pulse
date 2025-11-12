@@ -1,0 +1,41 @@
+# Tweet Pulse - Lightweight Dependencies
+# Install with: pip install -r requirements-lite.txt
+# This version removes PyTorch/Transformers for a much smaller footprint
+
+# Web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# Database
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+asyncpg>=0.29.0
+
+# Redis
+redis>=5.0.0
+
+# HTTP client
+httpx>=0.25.0
+
+# Twitter API
+tweepy>=4.14.0
+
+# Environment and config
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Data processing
+pandas>=2.1.0
+pyarrow>=14.0.0
+
+# Async support
+asyncio-mqtt>=0.15.0
+
+# Logging
+structlog>=23.2.0
+
+# Lightweight sentiment analysis (replaces PyTorch + Transformers)
+# VADER is ~1MB vs PyTorch ~3GB
+vaderSentiment>=3.3.2
+langdetect>=1.0.9

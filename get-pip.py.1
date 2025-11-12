@@ -20,125 +20,124 @@
 # If you're wondering how this is created, it is generated using
 # `scripts/generate.py` in https://github.com/pypa/get-pip.
 
+from base64 import b85decode
+import importlib
+import argparse
+import tempfile
+import shutil
+import pkgutil
+import os.path
 import sys
 
 this_python = sys.version_info[:2]
 min_version = (3, 8)
 if this_python < min_version:
-    message_parts = [
-        "This script does not work on Python {}.{}.".format(*this_python),
-        "The minimum supported Python version is {}.{}.".format(*min_version),
-        "Please use https://bootstrap.pypa.io/pip/{}.{}/get-pip.py instead.".format(*this_python),
-    ]
-    print("ERROR: " + " ".join(message_parts))
-    sys.exit(1)
-
-
-import os.path
-import pkgutil
-import shutil
-import tempfile
-import argparse
-import importlib
-from base64 import b85decode
+  message_parts = [
+      "This script does not work on Python {}.{}.".format(*this_python),
+      "The minimum supported Python version is {}.{}.".format(*min_version),
+      "Please use https://bootstrap.pypa.io/pip/{}.{}/get-pip.py instead.".format(
+          *this_python),
+  ]
+  print("ERROR: " + " ".join(message_parts))
+  sys.exit(1)
 
 
 def include_setuptools(args):
-    """
-    Install setuptools only if absent, not excluded and when using Python <3.12.
-    """
-    cli = not args.no_setuptools
-    env = not os.environ.get("PIP_NO_SETUPTOOLS")
-    absent = not importlib.util.find_spec("setuptools")
-    python_lt_3_12 = this_python < (3, 12)
-    return cli and env and absent and python_lt_3_12
+  """
+  Install setuptools only if absent, not excluded and when using Python <3.12.
+  """
+  cli = not args.no_setuptools
+  env = not os.environ.get("PIP_NO_SETUPTOOLS")
+  absent = not importlib.util.find_spec("setuptools")
+  python_lt_3_12 = this_python < (3, 12)
+  return cli and env and absent and python_lt_3_12
 
 
 def include_wheel(args):
-    """
-    Install wheel only if absent, not excluded and when using Python <3.12.
-    """
-    cli = not args.no_wheel
-    env = not os.environ.get("PIP_NO_WHEEL")
-    absent = not importlib.util.find_spec("wheel")
-    python_lt_3_12 = this_python < (3, 12)
-    return cli and env and absent and python_lt_3_12
+  """
+  Install wheel only if absent, not excluded and when using Python <3.12.
+  """
+  cli = not args.no_wheel
+  env = not os.environ.get("PIP_NO_WHEEL")
+  absent = not importlib.util.find_spec("wheel")
+  python_lt_3_12 = this_python < (3, 12)
+  return cli and env and absent and python_lt_3_12
 
 
 def determine_pip_install_arguments():
-    pre_parser = argparse.ArgumentParser()
-    pre_parser.add_argument("--no-setuptools", action="store_true")
-    pre_parser.add_argument("--no-wheel", action="store_true")
-    pre, args = pre_parser.parse_known_args()
+  pre_parser = argparse.ArgumentParser()
+  pre_parser.add_argument("--no-setuptools", action="store_true")
+  pre_parser.add_argument("--no-wheel", action="store_true")
+  pre, args = pre_parser.parse_known_args()
 
-    args.append("pip<25.1")
+  args.append("pip<25.1")
 
-    if include_setuptools(pre):
-        args.append("setuptools")
+  if include_setuptools(pre):
+    args.append("setuptools")
 
-    if include_wheel(pre):
-        args.append("wheel")
+  if include_wheel(pre):
+    args.append("wheel")
 
-    return ["install", "--upgrade", "--force-reinstall"] + args
+  return ["install", "--upgrade", "--force-reinstall"] + args
 
 
 def monkeypatch_for_cert(tmpdir):
-    """Patches `pip install` to provide default certificate with the lowest priority.
+  """Patches `pip install` to provide default certificate with the lowest priority.
 
-    This ensures that the bundled certificates are used unless the user specifies a
-    custom cert via any of pip's option passing mechanisms (config, env-var, CLI).
+  This ensures that the bundled certificates are used unless the user specifies a
+  custom cert via any of pip's option passing mechanisms (config, env-var, CLI).
 
-    A monkeypatch is the easiest way to achieve this, without messing too much with
-    the rest of pip's internals.
-    """
-    from pip._internal.commands.install import InstallCommand
+  A monkeypatch is the easiest way to achieve this, without messing too much with
+  the rest of pip's internals.
+  """
+  from pip._internal.commands.install import InstallCommand
 
-    # We want to be using the internal certificates.
-    cert_path = os.path.join(tmpdir, "cacert.pem")
-    with open(cert_path, "wb") as cert:
-        cert.write(pkgutil.get_data("pip._vendor.certifi", "cacert.pem"))
+  # We want to be using the internal certificates.
+  cert_path = os.path.join(tmpdir, "cacert.pem")
+  with open(cert_path, "wb") as cert:
+    cert.write(pkgutil.get_data("pip._vendor.certifi", "cacert.pem"))
 
-    install_parse_args = InstallCommand.parse_args
+  install_parse_args = InstallCommand.parse_args
 
-    def cert_parse_args(self, args):
-        if not self.parser.get_default_values().cert:
-            # There are no user provided cert -- force use of bundled cert
-            self.parser.defaults["cert"] = cert_path  # calculated above
-        return install_parse_args(self, args)
+  def cert_parse_args(self, args):
+    if not self.parser.get_default_values().cert:
+      # There are no user provided cert -- force use of bundled cert
+      self.parser.defaults["cert"] = cert_path  # calculated above
+    return install_parse_args(self, args)
 
-    InstallCommand.parse_args = cert_parse_args
+  InstallCommand.parse_args = cert_parse_args
 
 
 def bootstrap(tmpdir):
-    monkeypatch_for_cert(tmpdir)
+  monkeypatch_for_cert(tmpdir)
 
-    # Execute the included pip and use it to install the latest pip and
-    # any user-requested packages from PyPI.
-    from pip._internal.cli.main import main as pip_entry_point
-    args = determine_pip_install_arguments()
-    sys.exit(pip_entry_point(args))
+  # Execute the included pip and use it to install the latest pip and
+  # any user-requested packages from PyPI.
+  from pip._internal.cli.main import main as pip_entry_point
+  args = determine_pip_install_arguments()
+  sys.exit(pip_entry_point(args))
 
 
 def main():
-    tmpdir = None
-    try:
-        # Create a temporary working directory
-        tmpdir = tempfile.mkdtemp()
+  tmpdir = None
+  try:
+    # Create a temporary working directory
+    tmpdir = tempfile.mkdtemp()
 
-        # Unpack the zipfile into the temporary directory
-        pip_zip = os.path.join(tmpdir, "pip.zip")
-        with open(pip_zip, "wb") as fp:
-            fp.write(b85decode(DATA.replace(b"\n", b"")))
+    # Unpack the zipfile into the temporary directory
+    pip_zip = os.path.join(tmpdir, "pip.zip")
+    with open(pip_zip, "wb") as fp:
+      fp.write(b85decode(DATA.replace(b"\n", b"")))
 
-        # Add the zipfile to sys.path so that we can import it
-        sys.path.insert(0, pip_zip)
+    # Add the zipfile to sys.path so that we can import it
+    sys.path.insert(0, pip_zip)
 
-        # Run the bootstrap
-        bootstrap(tmpdir=tmpdir)
-    finally:
-        # Clean up our temporary working directory
-        if tmpdir:
-            shutil.rmtree(tmpdir, ignore_errors=True)
+    # Run the bootstrap
+    bootstrap(tmpdir=tmpdir)
+  finally:
+    # Clean up our temporary working directory
+    if tmpdir:
+      shutil.rmtree(tmpdir, ignore_errors=True)
 
 
 DATA = b"""
@@ -28837,4 +28836,4 @@ axZmqY;0*_GcR>?X>2cdVQF+OaCuNm1qJ{B006H6uL0$R000Rl8vp<R
 
 
 if __name__ == "__main__":
-    main()
+  main()
