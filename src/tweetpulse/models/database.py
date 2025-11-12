@@ -10,7 +10,9 @@ import os
 Base = declarative_base()
 
 # Database configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:password@localhost:5432/tweetpulse")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+asyncpg://user:password@localhost:5432/tweetpulse")
 
 # Create async engine
 engine = create_async_engine(DATABASE_URL, echo=False)
@@ -25,25 +27,29 @@ SessionLocal = sessionmaker(
 )
 
 # Dependency for FastAPI
+
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with SessionLocal() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
+  async with SessionLocal() as session:
+    try:
+      yield session
+      await session.commit()
+    except Exception:
+      await session.rollback()
+      raise
+    finally:
+      await session.close()
+
 
 class SentimentType(str, PyEnum):
-    POSITIVE = "positive"
-    NEGATIVE = "negative"
-    NEUTRAL = "neutral"
+  POSITIVE = "positive"
+  NEGATIVE = "negative"
+  NEUTRAL = "neutral"
+
 
 class Tweet(Base):
   __tablename__ = "tweets"
-  
+
   id = Column(String, primary_key=True)
   content = Column(String(280), nullable=False)
   author_id = Column(String, nullable=False)

@@ -2,9 +2,18 @@ from .pipeline import IngestionPipeline
 from .connector import TwitterStreamConnector
 from .consumer import StreamConsumer
 from .deduplication import BloomDeduplicator
-from .enrichment import TweetEnricher, BatchEnricher
+from .enrichment_factory import (
+    create_enricher,
+    create_batch_enricher,
+    get_enricher_info,
+)
 from .storage import Storage
 from .batch_writer import BatchWriter
+
+# For backward compatibility, import from factory
+# This will automatically select the right version based on environment
+TweetEnricher = create_enricher
+BatchEnricher = create_batch_enricher
 
 __all__ = [
   "IngestionPipeline",
@@ -13,6 +22,9 @@ __all__ = [
   "BloomDeduplicator",
   "TweetEnricher",
   "BatchEnricher",
+  "create_enricher",
+  "create_batch_enricher",
+  "get_enricher_info",
   "Storage",
   "BatchWriter",
 ]
