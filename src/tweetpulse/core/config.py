@@ -1,41 +1,37 @@
 import os
-from typing import Optional
-from pathlib import Path
-from datetime import datetime
+from dataclasses import dataclass
+from functools import lru_cache
 
+
+@dataclass
 class Settings:
-	# API Keys
-	TWITTER_BEARER_TOKEN: str = os.getenv("TWITTER_BEARER_TOKEN", "")
-	
-	# Database
-	DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://localhost/tweetpulse")
-	REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
-	DATABASE_ECHO: bool = os.getenv("DATABASE_ECHO", "False").lower() == "true"
-	
-	# App
-	DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
-	HOST: str = os.getenv("HOST", "0.0.0.0")
-	PORT: int = int(os.getenv("PORT", "8000"))
-	
-	# Rate Limits
-	MAX_TWEETS_PER_REQUEST: int = 100
-	REQUEST_TIMEOUT: int = 30
-	
-	# Feature Flags
-	ENABLE_DEBUGPY: bool = os.getenv("ENABLE_DEBUGPY", "False").lower() == "true"
+    DATABASE_URL: str = "postgresql+asyncpg://user:password@localhost:5432/tweetpulse"
+    ELASTICSEARCH_URL: str = "http://localhost:9200"
+    REDIS_URL: str = "redis://localhost:6379"
+    
+    TWITTER_BEARER_TOKEN: str = ""
+    
+    DEBUG: bool = False
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
+    DATABASE_ECHO: bool = False
+    
+    STREAM_KEY: str = "ingest:stream"
+    STREAM_CONSUMER_GROUP: str = "workers"
+    
+    def __post_init__(self):
+        self.DATABASE_URL = os.getenv("DATABASE_URL", self.DATABASE_URL)
+        self.ELASTICSEARCH_URL = os.getenv("ELASTICSEARCH_URL", self.ELASTICSEARCH_URL)
+        self.REDIS_URL = os.getenv("REDIS_URL", self.REDIS_URL)
+        self.TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN", self.TWITTER_BEARER_TOKEN)
+        self.DEBUG = os.getenv("DEBUG", "false").lower() == "true"
+        self.HOST = os.getenv("HOST", self.HOST)
+        self.PORT = int(os.getenv("PORT", str(self.PORT)))
+        self.DATABASE_ECHO = os.getenv("DATABASE_ECHO", "false").lower() == "true"
+        self.STREAM_KEY = os.getenv("STREAM_KEY", self.STREAM_KEY)
+        self.STREAM_CONSUMER_GROUP = os.getenv("STREAM_CONSUMER_GROUP", self.STREAM_CONSUMER_GROUP)
 
-	# Pipeline
-	NUM_WORKERS: int = int(os.getenv("NUM_WORKERS", "3"))
-	STAGING_DIR: Path = Path(os.getenv("STAGING_DIR", "./staging"))
-	BATCH_WRITE_INTERVAL: int = 300
-	BATCH_SIZE: int = int(os.getenv("BATCH_SIZE", "100"))  # Number of tweets per batch
-	MAX_BATCH_WAIT_SECONDS: int = int(os.getenv("MAX_BATCH_WAIT_SECONDS", "60"))  # Max wait time before flush
-	TWITTER_KEYWORDS: str = os.getenv("TWITTER_KEYWORDS", "python,fastapi,ai")
-	
-	# Logging
-	LOG_LEVEL: str = "INFO"
 
-settings = Settings()
-
+@lru_cache()
 def get_settings() -> Settings:
-	return settings
+    return Settings()

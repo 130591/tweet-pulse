@@ -1,41 +1,32 @@
-from typing import TypedDict 
-from .config import settings, Settings
-from tweetpulse.services.tweet_fetcher import TweetFetcher
-from tweetpulse.repositories.tweet_repository import TweetRepository
-from tweetpulse.utils.twitter_client import TwitterClient
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
+from functools import lru_cache
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from fastapi import Depends
+from redis.asyncio import Redis
+from elasticsearch import AsyncElasticsearch
 
-class TweetPulseSettings(TypedDict):
-  twitter_token: str
-  db_url: str
+from .config import get_settings
 
-# Define base dependencies first
-def get_twitter_client() -> TwitterClient:
-  return TwitterClient(settings.TWITTER_BEARER_TOKEN)
+settings = get_settings()
 
-def get_db_session() -> Session:
-  engine = create_engine(settings.DATABASE_URL)
-  SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-  return SessionLocal()
+@lru_cache()
+def get_db_session_factory():
+    engine = create_async_engine(
+        settings.DATABASE_URL,
+        echo=settings.DATABASE_ECHO,
+        pool_size=20,
+        max_overflow=10
+    )
+    return sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-def get_tweet_repository(session: Session = Depends(get_db_session)) -> TweetRepository:
-  return TweetRepository(session)
+@lru_cache()
+def get_redis_client() -> Redis:
+    return Redis.from_url(settings.REDIS_URL, decode_responses=True)
 
-# Define composed dependencies
-def get_tweet_fetcher(
-  twitter_client: TwitterClient = Depends(get_twitter_client),
-  repository: TweetRepository = Depends(get_tweet_repository)
-) -> TweetFetcher:
-  return TweetFetcher(twitter_client, repository)
+@lru_cache()
+def get_elasticsearch_client() -> AsyncElasticsearch:
+    return AsyncElasticsearch([settings.ELASTICSEARCH_URL])
 
-def get_settings() -> TweetPulseSettings:
-  return TweetPulseSettings(
-    twitter_token=settings.TWITTER_BEARER_TOKEN,
-    db_url=settings.DATABASE_URL
-  )
-
-def get_app_settings() -> Settings:
-  return settings
+async def get_db_session():
+    factory = get_db_session_factory()
+    async with factory() as session:
+        yield session

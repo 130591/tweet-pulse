@@ -1,11 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import logging
 import time
 
-from .api.v1 import tweets
-from .core.config import settings
+from tweetpulse.core.config import get_settings
+from tweetpulse.api import tweets, health, elastic
+
+settings = get_settings()
 
 logging.basicConfig(
 	level=logging.INFO if not settings.DEBUG else logging.DEBUG,
@@ -16,28 +17,20 @@ logger = logging.getLogger("tweetpulse")
 app = FastAPI(
 	title="TweetPulse",
 	description="Real-time social intelligence platform",
-	version="1.0.0",
-	debug=settings.DEBUG
+	version="2.0.0"
 )
 
 app.add_middleware(
 	CORSMiddleware,
 	allow_origins=["*"],
 	allow_credentials=True,
-	allow_methods=["GET", "POST", "PUT", "DELETE"],
+	allow_methods=["*"],
 	allow_headers=["*"],
 )
 
-app.add_middleware(
-	TrustedHostMiddleware,
-	allowed_hosts=["localhost", "127.0.0.1"],
-)
-
-
 @app.middleware("http")
-async def log_requests(request, call_next):
+async def log_requests(request: Request, call_next):
 	start_time = time.time()
-	
 	response = await call_next(request)
 	
 	process_time = time.time() - start_time
@@ -49,30 +42,29 @@ async def log_requests(request, call_next):
 	response.headers["X-Process-Time"] = str(process_time)
 	return response
 
-app.include_router(tweets.router, prefix="/health", tags=["health"])
-app.include_router(tweets.router, prefix="/tweets", tags=["tweets"])
-app.include_router(tweets.router, prefix="/settings", tags=["settings"])
-app.include_router(tweets.router, prefix="/stats", tags=["stats"])
+app.include_router(health.router)
+app.include_router(tweets.router, prefix="/api")
+app.include_router(elastic.router)
 
 @app.on_event("startup")
 async def startup_event():
-	logger.info("🚀 TweetPulse API starting...")
+	logger.info("Starting TweetPulse API...")
+	
 	if not settings.TWITTER_BEARER_TOKEN:
-		logger.warning("⚠️  TWITTER_BEARER_TOKEN not configured!")
-	else:
-		logger.info("✅ Twitter API configured")
+		logger.warning("TWITTER_BEARER_TOKEN not configured")
+	
+	logger.info("TweetPulse API ready")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-  logger.info("👋 TweetPulse API shutting down...")
+	logger.info("Shutting down TweetPulse API...")
 
 if __name__ == "__main__":
 	import uvicorn
-	
 	uvicorn.run(
-		"main:app",
-		host=settings.HOST,
-		port=settings.PORT,
-		reload=settings.DEBUG,
+		app, 
+		host=settings.HOST, 
+		port=settings.PORT, 
+		reload=settings.DEBUG, 
 		log_level="info" if not settings.DEBUG else "debug"
 	)
