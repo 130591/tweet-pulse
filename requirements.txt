@@ -3,8 +3,9 @@
 
 # Web framework
 fastapi>=0.104.0
-uvicorn[standard]>=0.24.0
-
+uvicorn[standard]==0.23.2
+rich==13.5.2
+elasticsearch==8.11.0
 # Database
 sqlalchemy>=2.0.0
 psycopg2-binary>=2.9.0
