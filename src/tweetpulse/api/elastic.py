@@ -6,7 +6,7 @@ from fastapi import APIRouter, Query, HTTPException
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
 
-from tweetpulse.elasticsearch import get_elastic_client
+from tweetpulse.core.elasticsearch.client import get_elastic_client
 
 router = APIRouter(prefix="/api/elastic", tags=["elasticsearch"])
 

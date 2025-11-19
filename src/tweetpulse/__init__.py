@@ -18,7 +18,7 @@ from .ingestion import (
     Storage,
     BatchWriter,
 )
-from .distributed import (
+from .core.distributed import (
     RedisLock,
     DistributedLockManager,
 )
