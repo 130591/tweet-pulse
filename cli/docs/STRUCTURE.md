@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Pulse CLI is now organized as a proper Python module with all text in English.
+The Pulse CLI is now organized as a proper Python module with.
 
 ## Directory Structure
 

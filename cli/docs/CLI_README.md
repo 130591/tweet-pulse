@@ -1,10 +1,50 @@
-# 🌊 Pulse CLI - TweetPulse Control Tool
+# Pulse CLI - TweetPulse Control Tool
 
 An interactive and beautiful CLI tool to manage your TweetPulse development environment.
 
 > **Note:** The CLI is now organized as a Python module in the `cli/` directory.
 
-## 🚀 Installation
+## Setup
+
+To make it easier to run the CLI, you can create an alias in your shell:
+
+```bash
+alias pulse='python3 /home/evertonpaixao/projects/tweet-pulse/pulse.py'
+```
+
+Then you can run the CLI with just `pulse`.
+
+Alternatively, you can add the alias to your shell configuration file for a more permanent solution. Here's how:
+
+### For Bash users
+
+Add the following line to your `~/.bashrc` file:
+
+```bash
+alias pulse='python3 /home/evertonpaixao/projects/tweet-pulse/pulse.py'
+```
+
+Then, reload your shell configuration by running:
+
+```bash
+source ~/.bashrc
+```
+
+### For Zsh users
+
+Add the following line to your `~/.zshrc` file:
+
+```bash
+alias pulse='python3 /home/evertonpaixao/projects/tweet-pulse/pulse.py'
+```
+
+Then, reload your shell configuration by running:
+
+```bash
+source ~/.zshrc
+```
+
+## Installation
 
 ```bash
 # Install dependencies
@@ -14,7 +54,7 @@ pip3 install -r requirements-cli.txt
 chmod +x pulse.py
 ```
 
-## 📦 Module Structure
+## Module Structure
 
 The CLI is organized as a Python module:
 
@@ -27,7 +67,7 @@ cli/
 
 The `pulse.py` file at the project root is a simple wrapper that imports and runs the CLI module.
 
-## 📖 How to Use
+## How to Use
 
 ### Interactive Mode (Recommended)
 
@@ -37,7 +77,9 @@ python3 pulse.py
 
 The interactive mode will ask you:
 1. Which service to run (worker, backend, frontend, api, all)
-2. Which version to use (Lite or Full)
+2. Which version to use (Lite or Full) - **only for Docker services** (worker, backend, api, all)
+
+**Note:** Frontend runs standalone with npm and doesn't require version selection.
 
 ### Direct Commands
 
@@ -61,7 +103,9 @@ python3 pulse.py dev all -d
 python3 pulse.py dev all -b
 ```
 
-### 🪶 Lite vs Full Mode
+### Lite vs Full Mode
+
+**Applies only to:** worker, backend, api, and all services
 
 - **Lite Mode** (default): Uses `docker-compose-dev.yml` (~500MB)
   - Faster startup
@@ -74,16 +118,18 @@ python3 pulse.py dev all -b
   - All ML features
   - Use for production-like testing
 
-**Everything runs in Docker containers** - The CLI manages containers via Docker Compose.
+**Service Isolation:**
+- **Frontend**: Runs standalone with npm/Vite (no Docker required, no version selection)
+- **Docker services**: Worker, backend, api, and all options run in Docker containers
 
-### 📁 Compose Files Used
+### Compose Files Used
 
 - `docker-compose-dev.yml` → **Lite mode** (default for development)
 - `docker-compose.yml` → **Full mode** (complete with ML)
 
 ### Available Commands
 
-#### 🚀 Start Services
+#### Start Services
 
 ```bash
 # Run only the worker
@@ -108,19 +154,19 @@ python3 pulse.py dev all -b
 ./pulse.py dev all -b
 ```
 
-#### 🛑 Stop Services
+#### Stop Services
 
 ```bash
 ./pulse.py stop
 ```
 
-#### 📊 Show Status
+#### Show Status
 
 ```bash
 ./pulse.py status
 ```
 
-#### 📜 Show Logs
+#### Show Logs
 
 ```bash
 # Show all logs
@@ -136,7 +182,7 @@ python3 pulse.py dev all -b
 ./pulse.py logs --tail 50
 ```
 
-#### 🧹 Clean Environment
+#### Clean Environment
 
 ```bash
 # Clean only containers
@@ -152,7 +198,7 @@ python3 pulse.py dev all -b
 ./pulse.py clean --all
 ```
 
-#### 🔨 Rebuild Images
+#### Rebuild Images
 
 ```bash
 # Rebuild all images
@@ -162,28 +208,28 @@ python3 pulse.py dev all -b
 ./pulse.py rebuild worker
 ```
 
-## 🎨 Features
+## Features
 
-- ✨ Beautiful and colorful interface with Rich
-- 🎯 Interactive mode with selection menu
-- 🚀 Direct commands for fast development
-- 📊 Real-time status visualization
-- 📜 Log management
-- 🧹 Easy environment cleanup
-- 🔨 Simplified rebuild
-- ⚙️ Granular service control
+- Beautiful and colorful interface with Rich
+- Interactive mode with selection menu
+- Direct commands for fast development
+- Real-time status visualization
+- Log management
+- Easy environment cleanup
+- Simplified rebuild
+- Granular service control
 
-## 📋 Available Services
+## Available Services
 
-| Command | Service | Description |
-|---------|---------|-------------|
-| `worker` | ⚙️ Worker | Processes tweets from Kafka |
-| `backend` | 🚀 Backend API | FastAPI server |
-| `frontend` | 💻 Frontend | React interface |
-| `api` | 🔥 Complete API | Workers + Backend |
-| `all` | 🌊 Full Environment | All services + Frontend |
+| Command | Service | Description | Version Choice |
+|---------|---------|-------------|----------------|
+| `worker` | Worker | Processes tweets from Kafka | Yes (Lite/Full) |
+| `backend` | Backend API | FastAPI server | Yes (Lite/Full) |
+| `frontend` | Frontend | React interface (npm) | **No** |
+| `api` | Complete API | Workers + Backend | Yes (Lite/Full) |
+| `all` | Full Environment | All services + Frontend | Yes (Lite/Full) |
 
-## 🔧 Tips
+## Tips
 
 ### Create shell alias
 
@@ -217,7 +263,7 @@ pulse status
 pulse stop
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Docker won't start
 
@@ -249,13 +295,16 @@ pulse rebuild
 pulse dev all
 ```
 
-## 📝 Usage Examples
+## Usage Examples
 
 ### Frontend Development
 
 ```bash
-# Only frontend to develop UI
+# Only frontend to develop UI (no Docker, runs with npm)
 pulse dev frontend
+
+# Frontend runs at http://localhost:5173
+# No version selection needed - it's just the React app
 ```
 
 ### Backend Development
@@ -294,7 +343,7 @@ pulse rebuild
 pulse dev all
 ```
 
-## 🎯 Next Features (TODO)
+## Next Features (TODO)
 
 - [ ] `pulse prod` command for production
 - [ ] Test integration
@@ -305,4 +354,4 @@ pulse dev all
 
 ---
 
-Made with 💙 for TweetPulse
+Made with for TweetPulse
