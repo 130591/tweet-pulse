@@ -5,7 +5,7 @@ VADER is optimized for social media text and is ~1MB vs PyTorch ~3GB.
 import asyncio
 import re
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import Optional
 
 import langdetect
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer

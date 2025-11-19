@@ -20,12 +20,12 @@ settings = get_settings()
 
 class IngestionPipeline:
   def __init__(
-      self,
-      keywords: List[str],
-      staging_dir: Path,
-      num_workers: int = 3,
-      redis_client: Optional[Redis] = None,
-      database_url: Optional[str] = None
+    self,
+    keywords: List[str],
+    staging_dir: Path,
+    num_workers: int = 3,
+    redis_client: Optional[Redis] = None,
+    database_url: Optional[str] = None
   ):
     self.keywords = keywords
     self.staging_dir = Path(staging_dir)
@@ -33,7 +33,6 @@ class IngestionPipeline:
     self.is_running = False
     self.tasks = []
 
-    # Initialize components with dependency injection
     self.redis = redis_client or Redis.from_url(settings.REDIS_URL)
     self.database_url = database_url or settings.DATABASE_URL
 
@@ -59,7 +58,6 @@ class IngestionPipeline:
     )
 
   def get_session(self) -> Session:
-    """Get a synchronous database session."""
     engine = create_engine(self.database_url)
     SessionLocal = sessionmaker(bind=engine)
     return SessionLocal()
@@ -105,7 +103,7 @@ class IngestionPipeline:
       batch_size=settings.BATCH_SIZE,
       max_wait_seconds=settings.MAX_BATCH_WAIT_SECONDS,
       max_retries=3,
-      redis_client=self.redis  # Pass Redis for distributed locking
+      redis_client=self.redis
     )
 
     writer_task = asyncio.create_task(self.batch_writer.run_forever())
@@ -149,7 +147,7 @@ class IngestionPipeline:
 
     # Clean up any stale distributed locks
     try:
-      from .distributed.locking import DistributedLockManager
+      from ..core.distributed.locking import DistributedLockManager
       lock_manager = DistributedLockManager(self.redis)
       await lock_manager.cleanup_stale_locks()
       logger.info("Cleaned up stale distributed locks")

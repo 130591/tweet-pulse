@@ -13,7 +13,7 @@ from redis.asyncio import Redis
 from ..repositories.tweet_repository import TweetRepository
 from ..models.database import Tweet, SentimentType
 from ..core.config import get_settings
-from ..distributed.locking import RedisLock
+from ..core.distributed.locking import RedisLock
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
