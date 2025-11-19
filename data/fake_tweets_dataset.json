@@ -1,0 +1,392 @@
+[
+  {
+    "id": "1234567890123456789",
+    "text": "Just launched our new AI product! 🚀 Excited to see what the community thinks. #AI #TechLaunch #Innovation",
+    "author_id": "9876543210",
+    "created_at": "2024-11-10T18:30:00Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 45,
+      "reply_count": 12,
+      "like_count": 230,
+      "quote_count": 8
+    }
+  },
+  {
+    "id": "1234567890123456790",
+    "text": "This new update is terrible. Nothing works anymore. Very disappointed with the service. #Frustrated",
+    "author_id": "1111222233",
+    "created_at": "2024-11-10T18:32:15Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 5,
+      "reply_count": 23,
+      "like_count": 15,
+      "quote_count": 2
+    }
+  },
+  {
+    "id": "1234567890123456791",
+    "text": "The weather today is okay I guess. Not too hot, not too cold. Just another day.",
+    "author_id": "4444555566",
+    "created_at": "2024-11-10T18:35:42Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 0,
+      "reply_count": 1,
+      "like_count": 3,
+      "quote_count": 0
+    }
+  },
+  {
+    "id": "1234567890123456792",
+    "text": "Amazing experience at the conference today! Met so many inspiring people. Thank you to all organizers! 🙏 #Conference2024",
+    "author_id": "7777888899",
+    "created_at": "2024-11-10T18:38:20Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 18,
+      "reply_count": 7,
+      "like_count": 95,
+      "quote_count": 3
+    }
+  },
+  {
+    "id": "1234567890123456793",
+    "text": "Breaking: Major security breach detected in popular app. Users advised to change passwords immediately. #CyberSecurity #Alert",
+    "author_id": "2222333344",
+    "created_at": "2024-11-10T18:40:55Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 1250,
+      "reply_count": 340,
+      "like_count": 890,
+      "quote_count": 156
+    }
+  },
+  {
+    "id": "1234567890123456794",
+    "text": "Coffee tastes good today ☕",
+    "author_id": "5555666677",
+    "created_at": "2024-11-10T18:43:10Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 2,
+      "reply_count": 4,
+      "like_count": 12,
+      "quote_count": 0
+    }
+  },
+  {
+    "id": "1234567890123456795",
+    "text": "Worst customer service ever! Been waiting for 3 hours and still no response. Never buying from them again! 😡 #BadService",
+    "author_id": "8888999900",
+    "created_at": "2024-11-10T18:45:33Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 8,
+      "reply_count": 15,
+      "like_count": 34,
+      "quote_count": 1
+    }
+  },
+  {
+    "id": "1234567890123456796",
+    "text": "New Python 3.13 features are incredible! The performance improvements are game-changing 🐍 #Python #Programming",
+    "author_id": "3333444455",
+    "created_at": "2024-11-10T18:48:00Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 67,
+      "reply_count": 28,
+      "like_count": 345,
+      "quote_count": 12
+    }
+  },
+  {
+    "id": "1234567890123456797",
+    "text": "Meeting at 3pm. Agenda: quarterly review.",
+    "author_id": "6666777788",
+    "created_at": "2024-11-10T18:50:22Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 0,
+      "reply_count": 2,
+      "like_count": 1,
+      "quote_count": 0
+    }
+  },
+  {
+    "id": "1234567890123456798",
+    "text": "Absolutely love the new design! Clean, intuitive, and beautiful. Great job team! 💯 #UXDesign #ProductDesign",
+    "author_id": "9999000011",
+    "created_at": "2024-11-10T18:52:45Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 23,
+      "reply_count": 9,
+      "like_count": 156,
+      "quote_count": 4
+    }
+  },
+  {
+    "id": "1234567890123456799",
+    "text": "Sistema completamente fora do ar há 2 horas. Prejuízo enorme. Péssimo serviço! #Indignado",
+    "author_id": "1234567890",
+    "created_at": "2024-11-10T18:55:10Z",
+    "lang": "pt",
+    "public_metrics": {
+      "retweet_count": 12,
+      "reply_count": 34,
+      "like_count": 45,
+      "quote_count": 5
+    }
+  },
+  {
+    "id": "1234567890123456800",
+    "text": "Hoje é segunda-feira. Mais uma semana de trabalho começando.",
+    "author_id": "2345678901",
+    "created_at": "2024-11-10T18:57:30Z",
+    "lang": "pt",
+    "public_metrics": {
+      "retweet_count": 1,
+      "reply_count": 0,
+      "like_count": 5,
+      "quote_count": 0
+    }
+  },
+  {
+    "id": "1234567890123456801",
+    "text": "Que experiência incrível! Atendimento perfeito, produto de qualidade. Super recomendo! ⭐⭐⭐⭐⭐ #Satisfeito",
+    "author_id": "3456789012",
+    "created_at": "2024-11-10T19:00:00Z",
+    "lang": "pt",
+    "public_metrics": {
+      "retweet_count": 8,
+      "reply_count": 3,
+      "like_count": 67,
+      "quote_count": 2
+    }
+  },
+  {
+    "id": "1234567890123456802",
+    "text": "AI is transforming healthcare in ways we never imagined. Excited for the future! 🏥🤖 #HealthTech #AI",
+    "author_id": "4567890123",
+    "created_at": "2024-11-10T19:02:25Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 145,
+      "reply_count": 56,
+      "like_count": 678,
+      "quote_count": 23
+    }
+  },
+  {
+    "id": "1234567890123456803",
+    "text": "Traffic is bad today. Stuck on the highway for an hour already.",
+    "author_id": "5678901234",
+    "created_at": "2024-11-10T19:04:50Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 0,
+      "reply_count": 1,
+      "like_count": 2,
+      "quote_count": 0
+    }
+  },
+  {
+    "id": "1234567890123456804",
+    "text": "This app keeps crashing! Lost all my work. Absolutely furious right now! 😤 #AppFail #Angry",
+    "author_id": "6789012345",
+    "created_at": "2024-11-10T19:07:15Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 15,
+      "reply_count": 42,
+      "like_count": 78,
+      "quote_count": 6
+    }
+  },
+  {
+    "id": "1234567890123456805",
+    "text": "Lançamento do novo produto foi um sucesso absoluto! Obrigado a todos que apoiaram! 🎉 #Sucesso #Gratidão",
+    "author_id": "7890123456",
+    "created_at": "2024-11-10T19:09:40Z",
+    "lang": "pt",
+    "public_metrics": {
+      "retweet_count": 34,
+      "reply_count": 18,
+      "like_count": 234,
+      "quote_count": 9
+    }
+  },
+  {
+    "id": "1234567890123456806",
+    "text": "Reading a book on distributed systems. Interesting concepts.",
+    "author_id": "8901234567",
+    "created_at": "2024-11-10T19:12:05Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 3,
+      "reply_count": 1,
+      "like_count": 8,
+      "quote_count": 0
+    }
+  },
+  {
+    "id": "1234567890123456807",
+    "text": "Best vacation ever! Beautiful beaches, amazing food, wonderful people. Can't wait to come back! 🏖️😍 #VacationMode",
+    "author_id": "9012345678",
+    "created_at": "2024-11-10T19:14:30Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 28,
+      "reply_count": 14,
+      "like_count": 189,
+      "quote_count": 5
+    }
+  },
+  {
+    "id": "1234567890123456808",
+    "text": "Decepcionante. Esperava muito mais pela qualidade que prometeram. Não vale o preço. #Decepção",
+    "author_id": "1357924680",
+    "created_at": "2024-11-10T19:16:55Z",
+    "lang": "pt",
+    "public_metrics": {
+      "retweet_count": 6,
+      "reply_count": 11,
+      "like_count": 23,
+      "quote_count": 2
+    }
+  },
+  {
+    "id": "1234567890123456809",
+    "text": "Checking emails. Regular Monday stuff.",
+    "author_id": "2468013579",
+    "created_at": "2024-11-10T19:19:20Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 0,
+      "reply_count": 0,
+      "like_count": 1,
+      "quote_count": 0
+    }
+  },
+  {
+    "id": "1234567890123456810",
+    "text": "Fantastic workshop on machine learning! Learned so much today. Thank you @instructor! 🧠📚 #MachineLearning #Education",
+    "author_id": "3691470258",
+    "created_at": "2024-11-10T19:21:45Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 52,
+      "reply_count": 19,
+      "like_count": 287,
+      "quote_count": 8
+    }
+  },
+  {
+    "id": "1234567890123456811",
+    "text": "Serviço horrível! Nunca mais volto nesse lugar. Atendimento péssimo e comida fria. #Insatisfeito",
+    "author_id": "4826159370",
+    "created_at": "2024-11-10T19:24:10Z",
+    "lang": "pt",
+    "public_metrics": {
+      "retweet_count": 9,
+      "reply_count": 27,
+      "like_count": 38,
+      "quote_count": 3
+    }
+  },
+  {
+    "id": "1234567890123456812",
+    "text": "Sunny day today. Temperature around 25°C.",
+    "author_id": "5937148260",
+    "created_at": "2024-11-10T19:26:35Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 0,
+      "reply_count": 0,
+      "like_count": 2,
+      "quote_count": 0
+    }
+  },
+  {
+    "id": "1234567890123456813",
+    "text": "Incredible performance by the team tonight! Championship here we come! 🏆⚽ #Victory #Champions",
+    "author_id": "6048271593",
+    "created_at": "2024-11-10T19:29:00Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 892,
+      "reply_count": 234,
+      "like_count": 4567,
+      "quote_count": 145
+    }
+  },
+  {
+    "id": "1234567890123456814",
+    "text": "Sistema de pagamento não funciona. Tentei 5 vezes e nada. Que raiva! 😠 #Problema #Pagamento",
+    "author_id": "7159382604",
+    "created_at": "2024-11-10T19:31:25Z",
+    "lang": "pt",
+    "public_metrics": {
+      "retweet_count": 11,
+      "reply_count": 19,
+      "like_count": 42,
+      "quote_count": 4
+    }
+  },
+  {
+    "id": "1234567890123456815",
+    "text": "Attending a webinar on cloud architecture. Taking notes.",
+    "author_id": "8260493715",
+    "created_at": "2024-11-10T19:33:50Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 1,
+      "reply_count": 0,
+      "like_count": 4,
+      "quote_count": 0
+    }
+  },
+  {
+    "id": "1234567890123456816",
+    "text": "Maravilhoso! Superou todas as expectativas. Produto excelente e entrega rápida! 👏 #Feliz #Recomendo",
+    "author_id": "9371604826",
+    "created_at": "2024-11-10T19:36:15Z",
+    "lang": "pt",
+    "public_metrics": {
+      "retweet_count": 15,
+      "reply_count": 7,
+      "like_count": 98,
+      "quote_count": 3
+    }
+  },
+  {
+    "id": "1234567890123456817",
+    "text": "Revolutionary blockchain technology is changing finance forever! The future is decentralized! 🚀💰 #Blockchain #Crypto",
+    "author_id": "1482715937",
+    "created_at": "2024-11-10T19:38:40Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 234,
+      "reply_count": 89,
+      "like_count": 1234,
+      "quote_count": 45
+    }
+  },
+  {
+    "id": "1234567890123456818",
+    "text": "Lunch was okay. Had a sandwich and coffee.",
+    "author_id": "2593826048",
+    "created_at": "2024-11-10T19:41:05Z",
+    "lang": "en",
+    "public_metrics": {
+      "retweet_count": 0,
+      "reply_count": 1,
+      "like_count": 3,
+      "quote_count": 0
+    }
+  }
+]

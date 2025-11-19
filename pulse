@@ -1,0 +1,45 @@
+#!/bin/bash
+# 🌊 Pulse CLI Wrapper - Runs inside Docker container
+# This script ensures all dependencies stay within the container
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Check if docker-compose-dev.yml exists
+if [ ! -f "docker-compose-dev.yml" ]; then
+    echo -e "${RED}❌ docker-compose-dev.yml not found${NC}"
+    echo -e "${YELLOW}💡 Make sure you're in the project root directory${NC}"
+    exit 1
+fi
+
+# Check if Docker is running
+if ! docker ps > /dev/null 2>&1; then
+    echo -e "${RED}❌ Docker is not running${NC}"
+    echo -e "${YELLOW}💡 Please start Docker first${NC}"
+    exit 1
+fi
+
+# Check if the app container exists or can be created
+echo -e "${BLUE}🐳 Ensuring container is ready...${NC}"
+
+# Start required services if not running
+if ! docker-compose -f docker-compose-dev.yml ps -q | grep -q .; then
+    echo -e "${YELLOW}📦 Starting required services (db, redis)...${NC}"
+    docker-compose -f docker-compose-dev.yml up -d db redis
+fi
+
+# Build the app container if needed
+if ! docker-compose -f docker-compose-dev.yml build app > /dev/null 2>&1; then
+    echo -e "${YELLOW}🔨 Building app container...${NC}"
+    docker-compose -f docker-compose-dev.yml build app
+fi
+
+# Run the CLI inside the container
+echo -e "${GREEN}🌊 Starting Pulse CLI...${NC}"
+exec docker-compose -f docker-compose-dev.yml run --rm app python3 /app/cli/src/main.py "$@"
