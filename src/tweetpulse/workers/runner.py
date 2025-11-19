@@ -1,8 +1,7 @@
 import asyncio
 import logging
 import os
-
-from tweetpulse.workers import TweetProcessorWorker, BatchProcessorWorker
+from .processors import TweetProcessorWorker, BatchProcessorWorker
 
 logging.basicConfig(
     level=logging.INFO,

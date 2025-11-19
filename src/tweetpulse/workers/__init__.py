@@ -1,4 +1,2 @@
-from .worker_runner import main
-from .workers import TweetProcessorWorker, BatchProcessorWorker
-
-__all__ = ["main", "TweetProcessorWorker", "BatchProcessorWorker"]
+# Empty file to break circular imports
+# Workers should be imported directly where needed
