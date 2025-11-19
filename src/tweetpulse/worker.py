@@ -7,7 +7,9 @@ from typing import Optional, Any
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from tweetpulse.core.config import settings
+from tweetpulse.core.config import get_settings
+
+settings = get_settings()
 from tweetpulse.models.database import Base
 from tweetpulse.ingestion.pipeline import IngestionPipeline
 

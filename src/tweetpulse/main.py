@@ -4,7 +4,8 @@ import logging
 import time
 
 from tweetpulse.core.config import get_settings
-from tweetpulse.api import tweets, health, elastic
+from tweetpulse.api.v1 import tweets, health
+from tweetpulse.api import elastic
 
 settings = get_settings()
 
