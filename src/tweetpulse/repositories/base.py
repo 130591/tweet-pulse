@@ -26,9 +26,11 @@ class BaseRepository(Generic[T]):
 		self.session.refresh(instance)
 		return instance
 
-	def get_by_id(self, id: str) -> Optional[T]:
+	async def get_by_id(self, id: str) -> Optional[T]:
 		"""Get a record by its ID."""
-		return self.session.query(self.model).filter(self.model.id == id).first()
+		from sqlalchemy import select
+		result = await self.session.execute(select(self.model).filter(self.model.id == id))
+		return result.scalar_one_or_none()
 
 	def get_all(self, skip: int = 0, limit: int = 100) -> List[T]:
 		"""Get all records with pagination."""
@@ -97,27 +99,62 @@ class BaseRepository(Generic[T]):
 					self.session.rollback()
 					raise e
 	
-def upsert_many(self, records: List[Dict[str, Any]], conflict_fields: List[str] = None) -> int:
-	if not records:
-		return 0
-	
-	try:
-		stmt = insert(self.model.__table__).values(records)
-		
-		if conflict_fields:
-			# Update all fields except the conflict fields
-			update_dict = {c.name: c for c in stmt.excluded if c.name not in conflict_fields}
-			stmt = stmt.on_conflict_do_update(
-				index_elements=conflict_fields,
-				set_=update_dict
-			)
+	async def upsert(self, record: Dict[str, Any] | T, conflict_fields: List[str] = None) -> T:
+		"""Upsert a single record (insert or update on conflict)."""
+		if isinstance(record, dict):
+			data = record
 		else:
-			# Use primary key as default conflict field
-			stmt = stmt.on_conflict_do_nothing()
+			# If it's a Pydantic model or has model_dump
+			data = record.model_dump() if hasattr(record, 'model_dump') else record.__dict__
 		
-		result = self.session.execute(stmt)
-		self.session.commit()
-		return result.rowcount
-	except Exception as e:
-		self.session.rollback()
-		raise e
+		try:
+			stmt = insert(self.model.__table__).values(data)
+			
+			if conflict_fields:
+				# Update all fields except the conflict fields
+				update_dict = {c.name: c for c in stmt.excluded if c.name not in conflict_fields}
+				stmt = stmt.on_conflict_do_update(
+					index_elements=conflict_fields,
+					set_=update_dict
+				)
+			else:
+				# Use primary key (id) as default conflict field
+				update_dict = {c.name: c for c in stmt.excluded if c.name != 'id'}
+				stmt = stmt.on_conflict_do_update(
+					index_elements=['id'],
+					set_=update_dict
+				)
+			
+			await self.session.execute(stmt)
+			await self.session.commit()
+			
+			# Return the inserted/updated record
+			return await self.get_by_id(data.get('id'))
+		except Exception as e:
+			await self.session.rollback()
+			raise e
+	
+	async def upsert_many(self, records: List[Dict[str, Any]], conflict_fields: List[str] = None) -> int:
+		if not records:
+			return 0
+		
+		try:
+			stmt = insert(self.model.__table__).values(records)
+			
+			if conflict_fields:
+				# Update all fields except the conflict fields
+				update_dict = {c.name: c for c in stmt.excluded if c.name not in conflict_fields}
+				stmt = stmt.on_conflict_do_update(
+					index_elements=conflict_fields,
+					set_=update_dict
+				)
+			else:
+				# Use primary key as default conflict field
+				stmt = stmt.on_conflict_do_nothing()
+			
+			result = await self.session.execute(stmt)
+			await self.session.commit()
+			return result.rowcount
+		except Exception as e:
+			await self.session.rollback()
+			raise e
