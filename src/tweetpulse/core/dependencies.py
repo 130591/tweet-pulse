@@ -8,14 +8,13 @@ from .config import get_settings
 
 settings = get_settings()
 
-
 @lru_cache()
 def get_db_session_factory():
   engine = create_async_engine(
-      settings.DATABASE_URL,
-      echo=settings.DATABASE_ECHO,
-      pool_size=20,
-      max_overflow=10
+    settings.DATABASE_URL,
+    echo=settings.DATABASE_ECHO,
+    pool_size=20,
+    max_overflow=10
   )
   return sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
