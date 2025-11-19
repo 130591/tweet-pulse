@@ -45,8 +45,7 @@ class TweetFetcher:
         total=response.meta.get("result_count", 0)
     )
 
-  async def fetch_tweets(self, query: str,
-                         max_results: int = 100) -> TweetsResponse:
+  async def fetch_tweets(self, query: str, max_results: int = 100) -> TweetsResponse:
     try:
       # Usa o método do TwitterClient customizado
       response = self.client.search_tweets(query, max_results)
