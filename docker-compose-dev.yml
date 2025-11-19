@@ -36,13 +36,14 @@ services:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       WORKER_TYPE: processor
       WORKER_ID: processor_1
+      PYTHONPATH: /app/src
     depends_on:
       - db
       - redis
       - elasticsearch
     volumes:
       - ./src:/app/src
-    command: python -m tweetpulse.worker_runner
+    command: python -m tweetpulse.workers.runner
     restart: always
 
   batch_worker:
@@ -57,13 +58,14 @@ services:
       WORKER_ID: batch_1
       BATCH_SIZE: 100
       BATCH_TIMEOUT: 10.0
+      PYTHONPATH: /app/src
     depends_on:
       - db
       - redis
       - elasticsearch
     volumes:
       - ./src:/app/src
-    command: python -m tweetpulse.worker_runner
+    command: python -m tweetpulse.workers.runner
     restart: always
 
   db:
@@ -74,8 +76,9 @@ services:
       POSTGRES_DB: tweetpulse
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/initdb:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
   elasticsearch:
     image: elasticsearch:8.11.0
