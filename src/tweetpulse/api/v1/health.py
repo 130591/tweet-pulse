@@ -1,8 +1,10 @@
 from fastapi import APIRouter
-from tweetpulse.core.config import settings
+from tweetpulse.core.config import get_settings
+
+settings = get_settings()
 
 router = APIRouter()
 
-@app.get("/health")
-async def health():
-  return {"status": "healthy", "debug": settings.DEBUG}
+@router.get("/health")
+async def health_check():
+    return {"status": "ok", "version": settings.VERSION}

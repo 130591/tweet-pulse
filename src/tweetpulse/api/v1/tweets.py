@@ -3,17 +3,19 @@ from typing import Annotated, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 
-from tweetpulse.core.config import settings
+from tweetpulse.core.config import get_settings
 from tweetpulse.services.tweet_fetcher import TweetFetcher
 from tweetpulse.models.database import SessionLocal, get_db
+
+settings = get_settings()
 
 router = APIRouter()
 
 class TweetStats(BaseModel):
-    total_tweets: int
-    positive_tweets: int
-    negative_tweets: int
-    neutral_tweets: int
+  total_tweets: int
+  positive_tweets: int
+  negative_tweets: int
+  neutral_tweets: int
 
 @router.get("/stats", response_model=TweetStats)
 async def get_stats(
