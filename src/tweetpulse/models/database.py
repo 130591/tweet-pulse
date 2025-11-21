@@ -47,19 +47,4 @@ class SentimentType(str, PyEnum):
   NEUTRAL = "neutral"
 
 
-class Tweet(Base):
-  __tablename__ = "tweets"
 
-  id = Column(String, primary_key=True)
-  content = Column(String(280), nullable=False)
-  author_id = Column(String, nullable=False)
-  created_at = Column(DateTime, nullable=False)
-
-  sentiment = Column(Enum(SentimentType), nullable=True)
-  confidence = Column(Float, nullable=True)
-  retweet_count = Column(Integer, index=True)
-  like_count = Column(Integer, index=True)
-  reply_count = Column(Integer)
-  quote_count = Column(Integer)
-  bookmark_count = Column(Integer)
-  impression_count = Column(Integer)

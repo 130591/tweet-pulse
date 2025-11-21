@@ -8,6 +8,7 @@ from ..models.tweet import Tweet
 from ..models.sentiment import Sentiment
 from ..models.entity import Entity
 from ..models.hashtag import Hashtag
+from .base import BaseRepository
 
 
 class TweetRepository(BaseRepository[Tweet]):

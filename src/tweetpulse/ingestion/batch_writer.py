@@ -11,7 +11,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from redis.asyncio import Redis
 
 from ..repositories.tweet_repository import TweetRepository
-from ..models.database import Tweet, SentimentType
+from ..models.tweet import Tweet
+from ..models.database import SentimentType
 from ..core.config import get_settings
 from ..core.distributed.locking import RedisLock
 

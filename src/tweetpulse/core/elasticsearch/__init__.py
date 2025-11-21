@@ -24,67 +24,67 @@ class ElasticClient:
 
     # Tweet index with proper mappings
     tweet_mapping = {
-        "mappings": {
-            "properties": {
-                "id": {"type": "keyword"},
-                "text": {"type": "text", "analyzer": "standard"},
-                "author_id": {"type": "keyword"},
-                "author_name": {"type": "keyword"},
-                "created_at": {"type": "date"},
-                "ingested_at": {"type": "date"},
-                "processed_at": {"type": "date"},
+      "mappings": {
+        "properties": {
+            "id": {"type": "keyword"},
+            "text": {"type": "text", "analyzer": "standard"},
+            "author_id": {"type": "keyword"},
+            "author_name": {"type": "keyword"},
+            "created_at": {"type": "date"},
+            "ingested_at": {"type": "date"},
+            "processed_at": {"type": "date"},
 
-                # Metrics
-                "retweet_count": {"type": "integer"},
-                "reply_count": {"type": "integer"},
-                "like_count": {"type": "integer"},
-                "quote_count": {"type": "integer"},
+            # Metrics
+            "retweet_count": {"type": "integer"},
+            "reply_count": {"type": "integer"},
+            "like_count": {"type": "integer"},
+            "quote_count": {"type": "integer"},
 
-                # Analysis results
-                "sentiment": {
-                    "type": "object",
-                    "properties": {
-                        "label": {"type": "keyword"},
-                        "score": {"type": "float"},
-                        "confidence": {"type": "float"}
-                    }
-                },
+            # Analysis results
+            "sentiment": {
+                "type": "object",
+                "properties": {
+                    "label": {"type": "keyword"},
+                    "score": {"type": "float"},
+                    "confidence": {"type": "float"}
+                }
+            },
 
-                "entities": {
-                    "type": "nested",
-                    "properties": {
-                        "text": {"type": "keyword"},
-                        "type": {"type": "keyword"},
-                        "score": {"type": "float"}
-                    }
-                },
+            "entities": {
+                "type": "nested",
+                "properties": {
+                    "text": {"type": "keyword"},
+                    "type": {"type": "keyword"},
+                    "score": {"type": "float"}
+                }
+            },
 
-                "keywords": {
-                    "type": "keyword"
-                },
+            "keywords": {
+                "type": "keyword"
+            },
 
-                "language": {"type": "keyword"},
-                "location": {
-                    "type": "object",
-                    "properties": {
-                        "country": {"type": "keyword"},
-                        "city": {"type": "keyword"},
-                        "coordinates": {"type": "geo_point"}
-                    }
-                },
+            "language": {"type": "keyword"},
+            "location": {
+                "type": "object",
+                "properties": {
+                    "country": {"type": "keyword"},
+                    "city": {"type": "keyword"},
+                    "coordinates": {"type": "geo_point"}
+                }
+            },
 
-                # Metadata
-                "source": {"type": "keyword"},
-                "stream_key": {"type": "keyword"},
-                "worker_id": {"type": "keyword"},
-                "batch_id": {"type": "keyword"}
-            }
-        },
-        "settings": {
-            "number_of_shards": 2,
-            "number_of_replicas": 0,
-            "refresh_interval": "1s"
-        }
+            # Metadata
+            "source": {"type": "keyword"},
+            "stream_key": {"type": "keyword"},
+            "worker_id": {"type": "keyword"},
+            "batch_id": {"type": "keyword"}
+          }
+      },
+      "settings": {
+          "number_of_shards": 2,
+          "number_of_replicas": 0,
+          "refresh_interval": "1s"
+      }
     }
 
     # Create tweet index

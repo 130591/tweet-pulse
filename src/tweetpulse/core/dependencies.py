@@ -33,3 +33,12 @@ async def get_db_session():
   factory = get_db_session_factory()
   async with factory() as session:
     yield session
+
+
+def get_search_service() -> "SearchService":
+    from tweetpulse.services.search_service import SearchService
+    from tweetpulse.core.elasticsearch.schemas.mapper import TweetDocumentMapper
+    
+    client = get_elasticsearch_client()
+    mapper = TweetDocumentMapper()
+    return SearchService(client=client, mapper=mapper)

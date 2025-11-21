@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.declarative import declarative_base
-from typing import Generic, Optional, TypeVar, List, Dict, Any
+from typing import Generic, Optional, TypeVar, List, Dict, Any, Union
 from sqlalchemy.dialects.postgresql import insert
 
 Base = declarative_base()
@@ -99,7 +99,7 @@ class BaseRepository(Generic[T]):
 					self.session.rollback()
 					raise e
 	
-	async def upsert(self, record: Dict[str, Any] | T, conflict_fields: List[str] = None) -> T:
+	async def upsert(self, record: Union[Dict[str, Any], T], conflict_fields: List[str] = None) -> T:
 		"""Upsert a single record (insert or update on conflict)."""
 		if isinstance(record, dict):
 			data = record
